@@ -1,0 +1,331 @@
+{% extends "layout.html" %}
+
+{% block title %}Editar Laudo{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <h1>
+            <i class="bi bi-pencil-square"></i> Editar Laudo
+            <small class="text-muted fs-4">{{ report.title }}</small>
+        </h1>
+        <div>
+            <a href="{{ url_for('reports') }}" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+            {% if report.status == 'completo' %}
+            <a href="{{ url_for('generate_docx', report_id=report.id) }}" class="btn btn-success">
+                <i class="bi bi-file-earmark-word"></i> Exportar DOCX
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Progresso</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    <a href="{{ url_for('upload_document', report_id=report.id) }}" 
+                       class="list-group-item list-group-item-action d-flex justify-content-between align-items-center 
+                              {% if report.current_step == 'documento' %}active{% endif %}">
+                        <div>
+                            <i class="bi bi-file-earmark-text"></i> Documento
+                        </div>
+                        {% if report.document_path %}
+                        <span class="badge bg-success rounded-pill"><i class="bi bi-check"></i></span>
+                        {% endif %}
+                    </a>
+                    <a href="{{ url_for('upload_audio', report_id=report.id) }}" 
+                       class="list-group-item list-group-item-action d-flex justify-content-between align-items-center 
+                              {% if report.current_step == 'audio' %}active{% endif %}">
+                        <div>
+                            <i class="bi bi-mic"></i> Áudio (opcional)
+                        </div>
+                        {% if report.audio_path %}
+                        <span class="badge bg-success rounded-pill"><i class="bi bi-check"></i></span>
+                        {% endif %}
+                    </a>
+                    <a href="{{ url_for('report_sections', report_id=report.id) }}" 
+                       class="list-group-item list-group-item-action">
+                        <i class="bi bi-list-check"></i> Seções do Laudo
+                    </a>
+                    <a href="{{ url_for('view_report', report_id=report.id) }}" 
+                       class="list-group-item list-group-item-action">
+                        <i class="bi bi-eye"></i> Visualizar Laudo
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Status do Laudo</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6>Status:</h6>
+                    {% if report.status == 'completo' %}
+                    <span class="badge bg-success p-2">Completo</span>
+                    {% else %}
+                    <span class="badge bg-warning p-2">Em andamento</span>
+                    {% endif %}
+                </div>
+                <div class="mb-3">
+                    <h6>Etapa atual:</h6>
+                    {% if report.current_step == 'documento' %}
+                    <span class="badge bg-info p-2">Upload de Documento</span>
+                    {% elif report.current_step == 'preambulo' %}
+                    <span class="badge bg-info p-2">Preâmbulo</span>
+                    {% elif report.current_step == 'palavras_chave' %}
+                    <span class="badge bg-info p-2">Palavras-chave</span>
+                    {% elif report.current_step == 'apresentacao_demanda' %}
+                    <span class="badge bg-info p-2">Apresentação da Demanda</span>
+                    {% elif report.current_step == 'objeto_pericia' %}
+                    <span class="badge bg-info p-2">Objeto da Perícia</span>
+                    {% elif report.current_step == 'metodologia' %}
+                    <span class="badge bg-info p-2">Metodologia</span>
+                    {% elif report.current_step == 'descricao' %}
+                    <span class="badge bg-info p-2">Descrição</span>
+                    {% elif report.current_step == 'discussao' %}
+                    <span class="badge bg-info p-2">Discussão</span>
+                    {% elif report.current_step == 'conclusao' %}
+                    <span class="badge bg-info p-2">Conclusão</span>
+                    {% else %}
+                    <span class="badge bg-secondary p-2">{{ report.current_step }}</span>
+                    {% endif %}
+                </div>
+                <div>
+                    <h6>Criado em:</h6>
+                    <p>{{ report.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
+                </div>
+                <div>
+                    <h6>Última atualização:</h6>
+                    <p>{{ report.updated_at.strftime('%d/%m/%Y %H:%M') }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Ações</h5>
+            </div>
+            <div class="card-body">
+                {% if report.document_path %}
+                <button type="button" class="btn btn-outline-primary mb-2 w-100" 
+                        data-bs-toggle="modal" data-bs-target="#analyzeDocumentModal">
+                    <i class="bi bi-search"></i> Analisar Documento
+                </button>
+                {% endif %}
+                
+                {% if report.status == 'completo' %}
+                <a href="{{ url_for('generate_docx', report_id=report.id) }}" class="btn btn-success mb-2 w-100">
+                    <i class="bi bi-file-earmark-word"></i> Exportar DOCX
+                </a>
+                {% endif %}
+                
+                <button type="button" class="btn btn-danger w-100" 
+                        data-bs-toggle="modal" data-bs-target="#deleteReportModal">
+                    <i class="bi bi-trash"></i> Excluir Laudo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-9">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Detalhes do Laudo</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('update_report', report_id=report.id) }}" id="editReportForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    
+                    <div class="mb-3">
+                        <label for="report_title" class="form-label">Título do Laudo</label>
+                        <input type="text" class="form-control" id="report_title" name="title" 
+                               value="{{ report.title }}" required>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Salvar Alterações
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Próximos Passos</h5>
+            </div>
+            <div class="card-body">
+                {% if not report.document_path %}
+                <div class="alert alert-info" role="alert">
+                    <h5><i class="bi bi-info-circle"></i> Upload de Documento</h5>
+                    <p>Para prosseguir com a geração do laudo, faça o upload do documento do processo.</p>
+                    <a href="{{ url_for('upload_document', report_id=report.id) }}" class="btn btn-primary">
+                        <i class="bi bi-upload"></i> Fazer Upload de Documento
+                    </a>
+                </div>
+                {% elif report.current_step == 'preambulo' %}
+                <div class="alert alert-info" role="alert">
+                    <h5><i class="bi bi-info-circle"></i> Gerar Seções do Laudo</h5>
+                    <p>O documento foi carregado. Agora você pode começar a gerar as seções do laudo pericial.</p>
+                    <a href="{{ url_for('report_sections', report_id=report.id) }}" class="btn btn-primary">
+                        <i class="bi bi-list-check"></i> Ir para Seções do Laudo
+                    </a>
+                </div>
+                {% elif report.status == 'em_andamento' %}
+                <div class="alert alert-info" role="alert">
+                    <h5><i class="bi bi-info-circle"></i> Continue Gerando o Laudo</h5>
+                    <p>Você está na etapa de {{ report.current_step.replace('_', ' ').capitalize() }}. Continue gerando as seções restantes do laudo.</p>
+                    <a href="{{ url_for('report_sections', report_id=report.id) }}" class="btn btn-primary">
+                        <i class="bi bi-list-check"></i> Continuar Gerando Seções
+                    </a>
+                </div>
+                {% else %}
+                <div class="alert alert-success" role="alert">
+                    <h5><i class="bi bi-check-circle"></i> Laudo Completo</h5>
+                    <p>Todas as seções do laudo foram geradas. Você pode visualizar o laudo completo ou exportá-lo para formato DOCX.</p>
+                    <div class="d-flex gap-2">
+                        <a href="{{ url_for('view_report', report_id=report.id) }}" class="btn btn-primary">
+                            <i class="bi bi-eye"></i> Visualizar Laudo
+                        </a>
+                        <a href="{{ url_for('generate_docx', report_id=report.id) }}" class="btn btn-success">
+                            <i class="bi bi-file-earmark-word"></i> Exportar DOCX
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Analyze Document Modal -->
+<div class="modal fade" id="analyzeDocumentModal" tabindex="-1" aria-labelledby="analyzeDocumentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="analyzeDocumentModalLabel">Analisar Documento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>A análise do documento extrairá informações relevantes e gerará automaticamente sugestões para as seções do laudo pericial.</p>
+                <p>Este processo pode demorar alguns segundos. Deseja continuar?</p>
+                
+                <div class="alert alert-warning d-none" id="analyzeWarning">
+                    <i class="bi bi-exclamation-triangle"></i> Esta ação pode sobrescrever conteúdo gerado anteriormente.
+                </div>
+                
+                <div class="d-flex justify-content-center d-none" id="analyzeLoading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                </div>
+                
+                <div class="alert alert-success d-none" id="analyzeSuccess">
+                    <i class="bi bi-check-circle"></i> Documento analisado com sucesso!
+                </div>
+                
+                <div class="alert alert-danger d-none" id="analyzeError">
+                    <i class="bi bi-x-circle"></i> <span id="analyzeErrorMessage">Erro ao analisar documento.</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="startAnalyzeBtn">
+                    <i class="bi bi-search"></i> Iniciar Análise
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Report Modal -->
+<div class="modal fade" id="deleteReportModal" tabindex="-1" aria-labelledby="deleteReportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteReportModalLabel">Confirmar Exclusão</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir o laudo "{{ report.title }}"?</p>
+                <p class="text-danger"><strong>Atenção:</strong> Esta ação não pode ser desfeita.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form method="POST" action="{{ url_for('delete_report', report_id=report.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger">Excluir</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Analyze Document functionality
+    const startAnalyzeBtn = document.getElementById('startAnalyzeBtn');
+    const analyzeLoading = document.getElementById('analyzeLoading');
+    const analyzeSuccess = document.getElementById('analyzeSuccess');
+    const analyzeError = document.getElementById('analyzeError');
+    const analyzeErrorMessage = document.getElementById('analyzeErrorMessage');
+    const analyzeWarning = document.getElementById('analyzeWarning');
+    
+    if (startAnalyzeBtn) {
+        startAnalyzeBtn.addEventListener('click', function() {
+            // Hide any previous messages and show loading
+            analyzeWarning.classList.add('d-none');
+            analyzeSuccess.classList.add('d-none');
+            analyzeError.classList.add('d-none');
+            analyzeLoading.classList.remove('d-none');
+            startAnalyzeBtn.disabled = true;
+            
+            // Make AJAX request to analyze document
+            fetch('/report/{{ report.id }}/analyze-document', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                analyzeLoading.classList.add('d-none');
+                
+                if (data.success) {
+                    analyzeSuccess.classList.remove('d-none');
+                    setTimeout(() => {
+                        // Close modal and redirect after success
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('analyzeDocumentModal'));
+                        modal.hide();
+                        window.location.href = '/report/{{ report.id }}/sections';
+                    }, 1500);
+                } else {
+                    analyzeError.classList.remove('d-none');
+                    analyzeErrorMessage.textContent = data.message;
+                    startAnalyzeBtn.disabled = false;
+                }
+            })
+            .catch(error => {
+                analyzeLoading.classList.add('d-none');
+                analyzeError.classList.remove('d-none');
+                analyzeErrorMessage.textContent = 'Erro na comunicação com o servidor: ' + error.message;
+                startAnalyzeBtn.disabled = false;
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

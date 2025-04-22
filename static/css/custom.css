@@ -1,0 +1,149 @@
+/* Perito IA - Custom CSS */
+
+/* Global Styles */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+/* Card Styles */
+.card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Button Enhancements */
+.btn {
+    font-weight: 500;
+}
+
+.btn-primary {
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+/* Section Content Styling */
+.section-content {
+    line-height: 1.6;
+    text-align: justify;
+}
+
+/* Text Area Enhancement */
+textarea.form-control {
+    min-height: 120px;
+    line-height: 1.5;
+}
+
+/* Print Styles */
+@media print {
+    .list-group, .card-header, .btn, .alert, .navbar, .footer {
+        display: none !important;
+    }
+    
+    .card, .card-body {
+        border: none !important;
+        box-shadow: none !important;
+    }
+    
+    #report-content {
+        font-size: 12pt;
+    }
+    
+    .text-muted.fst-italic {
+        display: none !important;
+    }
+    
+    h2, h3 {
+        page-break-after: avoid;
+    }
+    
+    section {
+        page-break-inside: avoid;
+    }
+}
+
+/* Progress Steps */
+.steps .step-number {
+    font-weight: bold;
+}
+
+/* Form Controls */
+.form-control:focus, .btn:focus {
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+/* Tab Content Animation */
+.tab-pane.fade.show {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Scrollbar Customization */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bs-dark);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--bs-primary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--bs-primary-rgb);
+}
+
+/* Loading Animation */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.spinner-border {
+    animation: spinner-border 1s linear infinite, pulse 2s ease-in-out infinite;
+}
+
+/* Audio Player Styling */
+audio {
+    width: 100%;
+    border-radius: 4px;
+    margin-top: 10px;
+}
+
+/* Textarea Dynamic Height Adjustments */
+textarea.form-control {
+    overflow-y: auto;
+    resize: vertical;
+}
+
+/* List Item Enhancements */
+.list-group-item.active {
+    border-left: 4px solid var(--bs-primary);
+}
+
+/* Smooth Transition for All Elements */
+* {
+    transition: all 0.2s ease;
+}
+
+/* Fix for navbar toggler icon in dark theme */
+.navbar-toggler-icon {
+    filter: invert(1);
+}

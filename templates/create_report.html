@@ -1,0 +1,95 @@
+{% extends "layout.html" %}
+
+{% block title %}Criar Novo Laudo{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1>
+            <i class="bi bi-file-earmark-plus"></i> Criar Novo Laudo
+        </h1>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Informações Básicas</h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('create_report') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <div class="mb-4">
+                        <label for="title" class="form-label">Título do Laudo <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="title" name="title" 
+                               placeholder="Ex: Laudo Pericial - Processo nº 0000000-00.0000.0.00.0000" required>
+                        <div class="form-text">
+                            Escolha um título descritivo que identifique facilmente o processo ou caso.
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg"></i> Criar Laudo
+                        </button>
+                        <a href="{{ url_for('reports') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-lg"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Como funciona o processo?</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="steps">
+                            <div class="step d-flex align-items-start mb-4">
+                                <div class="step-number bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; flex-shrink: 0;">1</div>
+                                <div>
+                                    <h5>Criar Laudo</h5>
+                                    <p class="text-muted">Inicie o processo criando um novo laudo com um título descritivo.</p>
+                                </div>
+                            </div>
+                            <div class="step d-flex align-items-start mb-4">
+                                <div class="step-number bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; flex-shrink: 0;">2</div>
+                                <div>
+                                    <h5>Anexar Documentos</h5>
+                                    <p class="text-muted">Faça upload dos documentos do processo para análise automática.</p>
+                                </div>
+                            </div>
+                            <div class="step d-flex align-items-start mb-4">
+                                <div class="step-number bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; flex-shrink: 0;">3</div>
+                                <div>
+                                    <h5>Gerar Seções</h5>
+                                    <p class="text-muted">Use a inteligência artificial para gerar cada seção do laudo pericial.</p>
+                                </div>
+                            </div>
+                            <div class="step d-flex align-items-start mb-4">
+                                <div class="step-number bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; flex-shrink: 0;">4</div>
+                                <div>
+                                    <h5>Revisar e Editar</h5>
+                                    <p class="text-muted">Revise e personalize o conteúdo gerado de acordo com suas necessidades.</p>
+                                </div>
+                            </div>
+                            <div class="step d-flex align-items-start">
+                                <div class="step-number bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; flex-shrink: 0;">5</div>
+                                <div>
+                                    <h5>Exportar Documento</h5>
+                                    <p class="text-muted">Exporte o laudo completo para formato DOCX, pronto para apresentação.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

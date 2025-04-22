@@ -1,0 +1,200 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="bi bi-speedometer2"></i> Dashboard
+            <small class="text-muted">Bem-vindo, {{ current_user.username }}</small>
+        </h1>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body">
+                <h4 class="card-title text-primary">Total de Laudos</h4>
+                <p class="display-4">{{ total_reports }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body">
+                <h4 class="card-title text-success">Laudos Concluídos</h4>
+                <p class="display-4">{{ completed_reports }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm text-center">
+            <div class="card-body">
+                <h4 class="card-title text-warning">Laudos em Andamento</h4>
+                <p class="display-4">{{ in_progress_reports }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">
+                    <i class="bi bi-clock-history"></i> Laudos Recentes
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                {% if latest_reports %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Status</th>
+                                <th>Etapa Atual</th>
+                                <th>Última Atualização</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for report in latest_reports %}
+                            <tr>
+                                <td>{{ report.title }}</td>
+                                <td>
+                                    {% if report.status == 'completo' %}
+                                    <span class="badge bg-success">Completo</span>
+                                    {% else %}
+                                    <span class="badge bg-warning">Em andamento</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if report.current_step == 'documento' %}
+                                    <span class="badge bg-info">Upload de Documento</span>
+                                    {% elif report.current_step == 'preambulo' %}
+                                    <span class="badge bg-info">Preâmbulo</span>
+                                    {% elif report.current_step == 'palavras_chave' %}
+                                    <span class="badge bg-info">Palavras-chave</span>
+                                    {% elif report.current_step == 'apresentacao_demanda' %}
+                                    <span class="badge bg-info">Apresentação da Demanda</span>
+                                    {% elif report.current_step == 'objeto_pericia' %}
+                                    <span class="badge bg-info">Objeto da Perícia</span>
+                                    {% elif report.current_step == 'metodologia' %}
+                                    <span class="badge bg-info">Metodologia</span>
+                                    {% elif report.current_step == 'descricao' %}
+                                    <span class="badge bg-info">Descrição</span>
+                                    {% elif report.current_step == 'discussao' %}
+                                    <span class="badge bg-info">Discussão</span>
+                                    {% elif report.current_step == 'conclusao' %}
+                                    <span class="badge bg-info">Conclusão</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">{{ report.current_step }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ report.updated_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ url_for('edit_report', report_id=report.id) }}" class="btn btn-outline-primary">
+                                            <i class="bi bi-pencil"></i> Editar
+                                        </a>
+                                        <a href="{{ url_for('view_report', report_id=report.id) }}" class="btn btn-outline-info">
+                                            <i class="bi bi-eye"></i> Visualizar
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="p-4 text-center">
+                    <p class="mb-0">Você ainda não tem laudos. Crie seu primeiro laudo agora!</p>
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-footer bg-light text-center">
+                <a href="{{ url_for('reports') }}" class="btn btn-outline-primary">
+                    <i class="bi bi-journals"></i> Ver Todos os Laudos
+                </a>
+                <a href="{{ url_for('create_report') }}" class="btn btn-primary">
+                    <i class="bi bi-file-earmark-plus"></i> Criar Novo Laudo
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">
+                    <i class="bi bi-info-circle"></i> Guia Rápido
+                </h5>
+            </div>
+            <div class="card-body">
+                <ol class="list-group list-group-numbered mb-0">
+                    <li class="list-group-item d-flex justify-content-between align-items-start border-0">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold">Crie um novo laudo</div>
+                            Inicie seu laudo pericial com um título descritivo
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-start border-0">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold">Anexe documentos</div>
+                            Faça upload do processo ou documentos relevantes
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-start border-0">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold">Gere cada seção</div>
+                            Use a IA para gerar conteúdo para cada seção do laudo
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-start border-0">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold">Revise e edite</div>
+                            Personalize e aprimore o conteúdo gerado
+                        </div>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-start border-0">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold">Exporte para DOCX</div>
+                            Baixe seu laudo pronto em formato Word
+                        </div>
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">
+                    <i class="bi bi-mic"></i> Transcrição de Áudio
+                </h5>
+            </div>
+            <div class="card-body">
+                <p>Para usar a transcrição de áudio em seus laudos:</p>
+                <ol>
+                    <li>Acesse um laudo existente ou crie um novo</li>
+                    <li>Vá para a seção de upload de áudio</li>
+                    <li>Faça upload de um arquivo de áudio (MP3, WAV, OGG, M4A)</li>
+                    <li>Aguarde a transcrição automática</li>
+                    <li>A IA analisará a transcrição e incorporará informações relevantes ao seu laudo</li>
+                </ol>
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('create_report') }}" class="btn btn-outline-primary">
+                        <i class="bi bi-file-earmark-plus"></i> Criar Laudo com Áudio
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

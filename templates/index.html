@@ -1,0 +1,110 @@
+{% extends "layout.html" %}
+
+{% block title %}Página Inicial{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="text-center mb-5">
+            <h1 class="display-4">Perito IA</h1>
+            <p class="lead">Sistema de Geração de Laudos Periciais Assistidos por Inteligência Artificial</p>
+        </div>
+
+        <div class="row mb-5">
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="text-center mb-3">
+                            <i class="bi bi-file-earmark-medical display-1 text-primary"></i>
+                        </div>
+                        <h3 class="card-title text-center">Laudos Periciais</h3>
+                        <p class="card-text">
+                            Crie laudos periciais completos com apoio da inteligência artificial.
+                            O sistema ajuda a estruturar seu laudo, gerar conteúdo para cada seção e
+                            formatar o documento final em conformidade com as normas técnicas.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="text-center mb-3">
+                            <i class="bi bi-mic display-1 text-primary"></i>
+                        </div>
+                        <h3 class="card-title text-center">Transcrição de Áudio</h3>
+                        <p class="card-text">
+                            Faça upload de gravações de áudio e obtenha transcrições automáticas.
+                            O sistema analisa o conteúdo transcrito e o integra ao seu laudo pericial,
+                            facilitando o trabalho com depoimentos e outros registros sonoros.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-5">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="text-center mb-3">
+                            <i class="bi bi-lightbulb display-4 text-warning"></i>
+                        </div>
+                        <h4 class="card-title text-center">Assistência IA</h4>
+                        <p class="card-text">
+                            Receba sugestões de conteúdo para cada seção do laudo,
+                            adaptadas ao contexto específico do seu caso.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="text-center mb-3">
+                            <i class="bi bi-file-earmark-pdf display-4 text-danger"></i>
+                        </div>
+                        <h4 class="card-title text-center">Análise de Documentos</h4>
+                        <p class="card-text">
+                            Extraia informações relevantes de documentos do processo
+                            para fundamentar seu laudo pericial.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="text-center mb-3">
+                            <i class="bi bi-file-earmark-word display-4 text-info"></i>
+                        </div>
+                        <h4 class="card-title text-center">Exportação para DOCX</h4>
+                        <p class="card-text">
+                            Gere documentos formatados no padrão Word (DOCX),
+                            prontos para revisão final e apresentação.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-5">
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg px-4 me-2">
+                <i class="bi bi-speedometer2"></i> Ir para Dashboard
+            </a>
+            <a href="{{ url_for('create_report') }}" class="btn btn-success btn-lg px-4">
+                <i class="bi bi-file-earmark-plus"></i> Criar Novo Laudo
+            </a>
+            {% else %}
+            <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg px-4 me-2">
+                <i class="bi bi-box-arrow-in-right"></i> Fazer Login
+            </a>
+            <a href="{{ url_for('register') }}" class="btn btn-outline-light btn-lg px-4">
+                <i class="bi bi-person-plus"></i> Criar Conta
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

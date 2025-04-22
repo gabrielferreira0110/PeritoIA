@@ -1,0 +1,330 @@
+{% extends "layout.html" %}
+
+{% block title %}Visualizar Laudo{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <h1>
+            <i class="bi bi-eye"></i> Visualizar Laudo
+            <small class="text-muted fs-4">{{ report.title }}</small>
+        </h1>
+        <div>
+            <a href="{{ url_for('edit_report', report_id=report.id) }}" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+            {% if report.status == 'completo' %}
+            <a href="{{ url_for('generate_docx', report_id=report.id) }}" class="btn btn-success">
+                <i class="bi bi-file-earmark-word"></i> Exportar DOCX
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Índice</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    <a href="#preambulo" class="list-group-item list-group-item-action">
+                        <i class="bi bi-1-circle"></i> Preâmbulo
+                    </a>
+                    <a href="#palavras_chave" class="list-group-item list-group-item-action">
+                        <i class="bi bi-2-circle"></i> Palavras-Chave
+                    </a>
+                    <a href="#apresentacao_demanda" class="list-group-item list-group-item-action">
+                        <i class="bi bi-3-circle"></i> Apresentação da Demanda
+                    </a>
+                    <a href="#objeto_pericia" class="list-group-item list-group-item-action">
+                        <i class="bi bi-4-circle"></i> Objeto da Perícia
+                    </a>
+                    <a href="#metodologia" class="list-group-item list-group-item-action">
+                        <i class="bi bi-5-circle"></i> Metodologia
+                    </a>
+                    <a href="#descricao" class="list-group-item list-group-item-action">
+                        <i class="bi bi-6-circle"></i> Descrição
+                    </a>
+                    <a href="#discussao" class="list-group-item list-group-item-action">
+                        <i class="bi bi-7-circle"></i> Discussão
+                    </a>
+                    <a href="#conclusao" class="list-group-item list-group-item-action">
+                        <i class="bi bi-8-circle"></i> Conclusão
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Status do Laudo</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6>Status:</h6>
+                    {% if report.status == 'completo' %}
+                    <span class="badge bg-success p-2">Completo</span>
+                    {% else %}
+                    <span class="badge bg-warning p-2">Em andamento</span>
+                    {% endif %}
+                </div>
+                
+                {% if report.status == 'em_andamento' %}
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i> Este laudo ainda está em andamento. Algumas seções podem estar incompletas.
+                </div>
+                {% endif %}
+                
+                <div>
+                    <h6>Criado em:</h6>
+                    <p>{{ report.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
+                </div>
+                <div>
+                    <h6>Última atualização:</h6>
+                    <p>{{ report.updated_at.strftime('%d/%m/%Y %H:%M') }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Ações</h5>
+            </div>
+            <div class="card-body">
+                <a href="{{ url_for('report_sections', report_id=report.id) }}" class="btn btn-primary mb-2 w-100">
+                    <i class="bi bi-pencil"></i> Editar Seções
+                </a>
+                
+                {% if report.status == 'completo' %}
+                <a href="{{ url_for('generate_docx', report_id=report.id) }}" class="btn btn-success mb-2 w-100">
+                    <i class="bi bi-file-earmark-word"></i> Exportar DOCX
+                </a>
+                {% endif %}
+                
+                <button onclick="window.print()" class="btn btn-outline-secondary w-100">
+                    <i class="bi bi-printer"></i> Imprimir
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">{{ report.title }}</h5>
+            </div>
+            <div class="card-body p-4" id="report-content">
+                <h2 class="text-center mb-5">LAUDO PERICIAL</h2>
+                
+                <!-- Preâmbulo -->
+                {% set has_preambulo = False %}
+                {% for section in sections %}
+                    {% if section.section_type == 'preambulo' %}
+                        {% set has_preambulo = True %}
+                        <section id="preambulo" class="mb-5">
+                            <h3 class="border-bottom pb-2 mb-3">PREÂMBULO</h3>
+                            <div class="section-content">
+                                {{ section.content|replace('\n', '<br>')|safe }}
+                            </div>
+                        </section>
+                    {% endif %}
+                {% endfor %}
+                {% if not has_preambulo %}
+                <section id="preambulo" class="mb-5">
+                    <h3 class="border-bottom pb-2 mb-3">PREÂMBULO</h3>
+                    <div class="section-content">
+                        <p class="text-muted fst-italic">Esta seção ainda não foi gerada.</p>
+                    </div>
+                </section>
+                {% endif %}
+                
+                <!-- Palavras-Chave -->
+                {% set has_palavras_chave = False %}
+                {% for section in sections %}
+                    {% if section.section_type == 'palavras_chave' %}
+                        {% set has_palavras_chave = True %}
+                        <section id="palavras_chave" class="mb-5">
+                            <h3 class="border-bottom pb-2 mb-3">PALAVRAS-CHAVE</h3>
+                            <div class="section-content">
+                                {{ section.content|replace('\n', '<br>')|safe }}
+                            </div>
+                        </section>
+                    {% endif %}
+                {% endfor %}
+                {% if not has_palavras_chave %}
+                <section id="palavras_chave" class="mb-5">
+                    <h3 class="border-bottom pb-2 mb-3">PALAVRAS-CHAVE</h3>
+                    <div class="section-content">
+                        <p class="text-muted fst-italic">Esta seção ainda não foi gerada.</p>
+                    </div>
+                </section>
+                {% endif %}
+                
+                <!-- Apresentação da Demanda -->
+                {% set has_apresentacao_demanda = False %}
+                {% for section in sections %}
+                    {% if section.section_type == 'apresentacao_demanda' %}
+                        {% set has_apresentacao_demanda = True %}
+                        <section id="apresentacao_demanda" class="mb-5">
+                            <h3 class="border-bottom pb-2 mb-3">APRESENTAÇÃO DA DEMANDA</h3>
+                            <div class="section-content">
+                                {{ section.content|replace('\n', '<br>')|safe }}
+                            </div>
+                        </section>
+                    {% endif %}
+                {% endfor %}
+                {% if not has_apresentacao_demanda %}
+                <section id="apresentacao_demanda" class="mb-5">
+                    <h3 class="border-bottom pb-2 mb-3">APRESENTAÇÃO DA DEMANDA</h3>
+                    <div class="section-content">
+                        <p class="text-muted fst-italic">Esta seção ainda não foi gerada.</p>
+                    </div>
+                </section>
+                {% endif %}
+                
+                <!-- Objeto da Perícia -->
+                {% set has_objeto_pericia = False %}
+                {% for section in sections %}
+                    {% if section.section_type == 'objeto_pericia' %}
+                        {% set has_objeto_pericia = True %}
+                        <section id="objeto_pericia" class="mb-5">
+                            <h3 class="border-bottom pb-2 mb-3">OBJETO DA PERÍCIA</h3>
+                            <div class="section-content">
+                                {{ section.content|replace('\n', '<br>')|safe }}
+                            </div>
+                        </section>
+                    {% endif %}
+                {% endfor %}
+                {% if not has_objeto_pericia %}
+                <section id="objeto_pericia" class="mb-5">
+                    <h3 class="border-bottom pb-2 mb-3">OBJETO DA PERÍCIA</h3>
+                    <div class="section-content">
+                        <p class="text-muted fst-italic">Esta seção ainda não foi gerada.</p>
+                    </div>
+                </section>
+                {% endif %}
+                
+                <!-- Metodologia -->
+                {% set has_metodologia = False %}
+                {% for section in sections %}
+                    {% if section.section_type == 'metodologia' %}
+                        {% set has_metodologia = True %}
+                        <section id="metodologia" class="mb-5">
+                            <h3 class="border-bottom pb-2 mb-3">METODOLOGIA</h3>
+                            <div class="section-content">
+                                {{ section.content|replace('\n', '<br>')|safe }}
+                            </div>
+                        </section>
+                    {% endif %}
+                {% endfor %}
+                {% if not has_metodologia %}
+                <section id="metodologia" class="mb-5">
+                    <h3 class="border-bottom pb-2 mb-3">METODOLOGIA</h3>
+                    <div class="section-content">
+                        <p class="text-muted fst-italic">Esta seção ainda não foi gerada.</p>
+                    </div>
+                </section>
+                {% endif %}
+                
+                <!-- Descrição -->
+                {% set has_descricao = False %}
+                {% for section in sections %}
+                    {% if section.section_type == 'descricao' %}
+                        {% set has_descricao = True %}
+                        <section id="descricao" class="mb-5">
+                            <h3 class="border-bottom pb-2 mb-3">DESCRIÇÃO</h3>
+                            <div class="section-content">
+                                {{ section.content|replace('\n', '<br>')|safe }}
+                            </div>
+                        </section>
+                    {% endif %}
+                {% endfor %}
+                {% if not has_descricao %}
+                <section id="descricao" class="mb-5">
+                    <h3 class="border-bottom pb-2 mb-3">DESCRIÇÃO</h3>
+                    <div class="section-content">
+                        <p class="text-muted fst-italic">Esta seção ainda não foi gerada.</p>
+                    </div>
+                </section>
+                {% endif %}
+                
+                <!-- Discussão -->
+                {% set has_discussao = False %}
+                {% for section in sections %}
+                    {% if section.section_type == 'discussao' %}
+                        {% set has_discussao = True %}
+                        <section id="discussao" class="mb-5">
+                            <h3 class="border-bottom pb-2 mb-3">DISCUSSÃO</h3>
+                            <div class="section-content">
+                                {{ section.content|replace('\n', '<br>')|safe }}
+                            </div>
+                        </section>
+                    {% endif %}
+                {% endfor %}
+                {% if not has_discussao %}
+                <section id="discussao" class="mb-5">
+                    <h3 class="border-bottom pb-2 mb-3">DISCUSSÃO</h3>
+                    <div class="section-content">
+                        <p class="text-muted fst-italic">Esta seção ainda não foi gerada.</p>
+                    </div>
+                </section>
+                {% endif %}
+                
+                <!-- Conclusão -->
+                {% set has_conclusao = False %}
+                {% for section in sections %}
+                    {% if section.section_type == 'conclusao' %}
+                        {% set has_conclusao = True %}
+                        <section id="conclusao" class="mb-5">
+                            <h3 class="border-bottom pb-2 mb-3">CONCLUSÃO</h3>
+                            <div class="section-content">
+                                {{ section.content|replace('\n', '<br>')|safe }}
+                            </div>
+                        </section>
+                    {% endif %}
+                {% endfor %}
+                {% if not has_conclusao %}
+                <section id="conclusao" class="mb-5">
+                    <h3 class="border-bottom pb-2 mb-3">CONCLUSÃO</h3>
+                    <div class="section-content">
+                        <p class="text-muted fst-italic">Esta seção ainda não foi gerada.</p>
+                    </div>
+                </section>
+                {% endif %}
+                
+                <!-- Assinatura -->
+                <div class="text-center mt-5 pt-5">
+                    <p>{{ now.strftime('%d de %B de %Y') }}</p>
+                    <div class="mt-5 mb-2">________________________________</div>
+                    <p>Perito Judicial</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Smooth scrolling for section navigation
+    document.querySelectorAll('.list-group-item').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            const targetElement = document.querySelector(targetId);
+            
+            if (targetElement) {
+                window.scrollTo({
+                    top: targetElement.offsetTop - 20,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,642 @@
+{% extends "layout.html" %}
+
+{% block title %}Seções do Laudo{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <h1>
+            <i class="bi bi-list-check"></i> Seções do Laudo
+            <small class="text-muted fs-4">{{ report.title }}</small>
+        </h1>
+        <div>
+            <a href="{{ url_for('edit_report', report_id=report.id) }}" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+            {% if report.status == 'completo' %}
+            <a href="{{ url_for('generate_docx', report_id=report.id) }}" class="btn btn-success">
+                <i class="bi bi-file-earmark-word"></i> Exportar DOCX
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="list-group mb-4 shadow-sm">
+            <a href="#preambulo" class="list-group-item list-group-item-action d-flex justify-content-between 
+                   {% if report.current_step == 'preambulo' %}active{% endif %}" 
+               data-bs-toggle="list">
+                <div>
+                    <i class="bi bi-1-circle"></i> Preâmbulo
+                </div>
+                {% if sections.get('preambulo') %}
+                <span class="badge bg-success rounded-pill"><i class="bi bi-check"></i></span>
+                {% endif %}
+            </a>
+            <a href="#palavras_chave" class="list-group-item list-group-item-action d-flex justify-content-between
+                   {% if report.current_step == 'palavras_chave' %}active{% endif %}" 
+               data-bs-toggle="list">
+                <div>
+                    <i class="bi bi-2-circle"></i> Palavras-Chave
+                </div>
+                {% if sections.get('palavras_chave') %}
+                <span class="badge bg-success rounded-pill"><i class="bi bi-check"></i></span>
+                {% endif %}
+            </a>
+            <a href="#apresentacao_demanda" class="list-group-item list-group-item-action d-flex justify-content-between
+                   {% if report.current_step == 'apresentacao_demanda' %}active{% endif %}" 
+               data-bs-toggle="list">
+                <div>
+                    <i class="bi bi-3-circle"></i> Apresentação da Demanda
+                </div>
+                {% if sections.get('apresentacao_demanda') %}
+                <span class="badge bg-success rounded-pill"><i class="bi bi-check"></i></span>
+                {% endif %}
+            </a>
+            <a href="#objeto_pericia" class="list-group-item list-group-item-action d-flex justify-content-between
+                   {% if report.current_step == 'objeto_pericia' %}active{% endif %}" 
+               data-bs-toggle="list">
+                <div>
+                    <i class="bi bi-4-circle"></i> Objeto da Perícia
+                </div>
+                {% if sections.get('objeto_pericia') %}
+                <span class="badge bg-success rounded-pill"><i class="bi bi-check"></i></span>
+                {% endif %}
+            </a>
+            <a href="#metodologia" class="list-group-item list-group-item-action d-flex justify-content-between
+                   {% if report.current_step == 'metodologia' %}active{% endif %}" 
+               data-bs-toggle="list">
+                <div>
+                    <i class="bi bi-5-circle"></i> Metodologia
+                </div>
+                {% if sections.get('metodologia') %}
+                <span class="badge bg-success rounded-pill"><i class="bi bi-check"></i></span>
+                {% endif %}
+            </a>
+            <a href="#descricao" class="list-group-item list-group-item-action d-flex justify-content-between
+                   {% if report.current_step == 'descricao' %}active{% endif %}" 
+               data-bs-toggle="list">
+                <div>
+                    <i class="bi bi-6-circle"></i> Descrição
+                </div>
+                {% if sections.get('descricao') %}
+                <span class="badge bg-success rounded-pill"><i class="bi bi-check"></i></span>
+                {% endif %}
+            </a>
+            <a href="#discussao" class="list-group-item list-group-item-action d-flex justify-content-between
+                   {% if report.current_step == 'discussao' %}active{% endif %}" 
+               data-bs-toggle="list">
+                <div>
+                    <i class="bi bi-7-circle"></i> Discussão
+                </div>
+                {% if sections.get('discussao') %}
+                <span class="badge bg-success rounded-pill"><i class="bi bi-check"></i></span>
+                {% endif %}
+            </a>
+            <a href="#conclusao" class="list-group-item list-group-item-action d-flex justify-content-between
+                   {% if report.current_step == 'conclusao' %}active{% endif %}" 
+               data-bs-toggle="list">
+                <div>
+                    <i class="bi bi-8-circle"></i> Conclusão
+                </div>
+                {% if sections.get('conclusao') %}
+                <span class="badge bg-success rounded-pill"><i class="bi bi-check"></i></span>
+                {% endif %}
+            </a>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Status do Laudo</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6>Status:</h6>
+                    {% if report.status == 'completo' %}
+                    <span class="badge bg-success p-2">Completo</span>
+                    {% else %}
+                    <span class="badge bg-warning p-2">Em andamento</span>
+                    {% endif %}
+                </div>
+                <div class="mb-3">
+                    <h6>Etapa atual:</h6>
+                    {% if report.current_step == 'documento' %}
+                    <span class="badge bg-info p-2">Upload de Documento</span>
+                    {% elif report.current_step == 'preambulo' %}
+                    <span class="badge bg-info p-2">Preâmbulo</span>
+                    {% elif report.current_step == 'palavras_chave' %}
+                    <span class="badge bg-info p-2">Palavras-chave</span>
+                    {% elif report.current_step == 'apresentacao_demanda' %}
+                    <span class="badge bg-info p-2">Apresentação da Demanda</span>
+                    {% elif report.current_step == 'objeto_pericia' %}
+                    <span class="badge bg-info p-2">Objeto da Perícia</span>
+                    {% elif report.current_step == 'metodologia' %}
+                    <span class="badge bg-info p-2">Metodologia</span>
+                    {% elif report.current_step == 'descricao' %}
+                    <span class="badge bg-info p-2">Descrição</span>
+                    {% elif report.current_step == 'discussao' %}
+                    <span class="badge bg-info p-2">Discussão</span>
+                    {% elif report.current_step == 'conclusao' %}
+                    <span class="badge bg-info p-2">Conclusão</span>
+                    {% else %}
+                    <span class="badge bg-secondary p-2">{{ report.current_step }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% if report.audio_path %}
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Transcrição de Áudio</h5>
+            </div>
+            <div class="card-body">
+                {% set transcription = report.transcriptions[0] if report.transcriptions else None %}
+                {% if transcription %}
+                <button type="button" class="btn btn-info w-100" data-bs-toggle="modal" data-bs-target="#transcriptionModal">
+                    <i class="bi bi-file-text"></i> Ver Transcrição
+                </button>
+                {% else %}
+                <p class="text-muted mb-0">Nenhuma transcrição disponível</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Ações</h5>
+            </div>
+            <div class="card-body">
+                <a href="{{ url_for('view_report', report_id=report.id) }}" class="btn btn-primary mb-2 w-100">
+                    <i class="bi bi-eye"></i> Visualizar Laudo Completo
+                </a>
+                
+                {% if report.status == 'completo' %}
+                <a href="{{ url_for('generate_docx', report_id=report.id) }}" class="btn btn-success mb-2 w-100">
+                    <i class="bi bi-file-earmark-word"></i> Exportar DOCX
+                </a>
+                {% endif %}
+                
+                {% if not report.audio_path %}
+                <a href="{{ url_for('upload_audio', report_id=report.id) }}" class="btn btn-outline-primary mb-2 w-100">
+                    <i class="bi bi-mic"></i> Adicionar Áudio
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-9">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0" id="sectionTitle">Seção do Laudo</h5>
+                    <button class="btn btn-sm btn-primary d-none" id="saveBtn">
+                        <i class="bi bi-save"></i> Salvar Alterações
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="tab-content">
+                    <!-- Preâmbulo -->
+                    <div class="tab-pane fade" id="preambulo" role="tabpanel">
+                        <h3 class="mb-3">Preâmbulo</h3>
+                        <p class="text-muted mb-4">O preâmbulo contém a identificação formal do perito, do juízo, do processo e das partes envolvidas.</p>
+                        
+                        <div class="mb-3">
+                            <textarea class="form-control" id="preambulo_content" rows="12">{{ sections.get('preambulo').content if sections.get('preambulo') else '' }}</textarea>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary" id="generate_preambulo">
+                                <i class="bi bi-magic"></i> Gerar com IA
+                            </button>
+                            <button class="btn btn-success" id="save_preambulo">
+                                <i class="bi bi-save"></i> Salvar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Palavras-Chave -->
+                    <div class="tab-pane fade" id="palavras_chave" role="tabpanel">
+                        <h3 class="mb-3">Palavras-Chave</h3>
+                        <p class="text-muted mb-4">Palavras-chave relevantes para este laudo pericial, relacionadas ao contexto do processo.</p>
+                        
+                        <div class="mb-3">
+                            <textarea class="form-control" id="palavras_chave_content" rows="6">{{ sections.get('palavras_chave').content if sections.get('palavras_chave') else '' }}</textarea>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary" id="generate_palavras_chave">
+                                <i class="bi bi-magic"></i> Gerar com IA
+                            </button>
+                            <button class="btn btn-success" id="save_palavras_chave">
+                                <i class="bi bi-save"></i> Salvar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Apresentação da Demanda -->
+                    <div class="tab-pane fade" id="apresentacao_demanda" role="tabpanel">
+                        <h3 class="mb-3">Apresentação da Demanda</h3>
+                        <p class="text-muted mb-4">A apresentação da demanda descreve o contexto do processo e o que está sendo questionado.</p>
+                        
+                        <div class="mb-3">
+                            <textarea class="form-control" id="apresentacao_demanda_content" rows="12">{{ sections.get('apresentacao_demanda').content if sections.get('apresentacao_demanda') else '' }}</textarea>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary" id="generate_apresentacao_demanda">
+                                <i class="bi bi-magic"></i> Gerar com IA
+                            </button>
+                            <button class="btn btn-success" id="save_apresentacao_demanda">
+                                <i class="bi bi-save"></i> Salvar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Objeto da Perícia -->
+                    <div class="tab-pane fade" id="objeto_pericia" role="tabpanel">
+                        <h3 class="mb-3">Objeto da Perícia</h3>
+                        <p class="text-muted mb-4">O objeto da perícia indica exatamente o que será analisado, avaliado ou investigado.</p>
+                        
+                        <div class="mb-3">
+                            <textarea class="form-control" id="objeto_pericia_content" rows="10">{{ sections.get('objeto_pericia').content if sections.get('objeto_pericia') else '' }}</textarea>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary" id="generate_objeto_pericia">
+                                <i class="bi bi-magic"></i> Gerar com IA
+                            </button>
+                            <button class="btn btn-success" id="save_objeto_pericia">
+                                <i class="bi bi-save"></i> Salvar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Metodologia -->
+                    <div class="tab-pane fade" id="metodologia" role="tabpanel">
+                        <h3 class="mb-3">Metodologia</h3>
+                        <p class="text-muted mb-4">A metodologia descreve os procedimentos, técnicas e métodos científicos adotados na perícia.</p>
+                        
+                        <div class="mb-3">
+                            <textarea class="form-control" id="metodologia_content" rows="12">{{ sections.get('metodologia').content if sections.get('metodologia') else '' }}</textarea>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary" id="generate_metodologia">
+                                <i class="bi bi-magic"></i> Gerar com IA
+                            </button>
+                            <button class="btn btn-success" id="save_metodologia">
+                                <i class="bi bi-save"></i> Salvar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Descrição -->
+                    <div class="tab-pane fade" id="descricao" role="tabpanel">
+                        <h3 class="mb-3">Descrição</h3>
+                        <p class="text-muted mb-4">A descrição relata objetivamente os elementos analisados na perícia.</p>
+                        
+                        <div class="mb-3">
+                            <textarea class="form-control" id="descricao_content" rows="15">{{ sections.get('descricao').content if sections.get('descricao') else '' }}</textarea>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary" id="generate_descricao">
+                                <i class="bi bi-magic"></i> Gerar com IA
+                            </button>
+                            <button class="btn btn-success" id="save_descricao">
+                                <i class="bi bi-save"></i> Salvar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Discussão -->
+                    <div class="tab-pane fade" id="discussao" role="tabpanel">
+                        <h3 class="mb-3">Discussão</h3>
+                        <p class="text-muted mb-4">A discussão analisa as evidências descritas e interpreta os achados da perícia.</p>
+                        
+                        <div class="mb-3">
+                            <textarea class="form-control" id="discussao_content" rows="15">{{ sections.get('discussao').content if sections.get('discussao') else '' }}</textarea>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary" id="generate_discussao">
+                                <i class="bi bi-magic"></i> Gerar com IA
+                            </button>
+                            <button class="btn btn-success" id="save_discussao">
+                                <i class="bi bi-save"></i> Salvar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Conclusão -->
+                    <div class="tab-pane fade" id="conclusao" role="tabpanel">
+                        <h3 class="mb-3">Conclusão</h3>
+                        <p class="text-muted mb-4">A conclusão sintetiza os principais achados e apresenta as respostas fundamentadas às questões periciais.</p>
+                        
+                        <div class="mb-3">
+                            <textarea class="form-control" id="conclusao_content" rows="12">{{ sections.get('conclusao').content if sections.get('conclusao') else '' }}</textarea>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary" id="generate_conclusao">
+                                <i class="bi bi-magic"></i> Gerar com IA
+                            </button>
+                            <button class="btn btn-success" id="save_conclusao">
+                                <i class="bi bi-save"></i> Salvar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Transcription Modal -->
+{% if report.transcriptions %}
+<div class="modal fade" id="transcriptionModal" tabindex="-1" aria-labelledby="transcriptionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="transcriptionModalLabel">Transcrição do Áudio</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <p class="mb-0">{{ report.transcriptions[0].transcription if report.transcriptions else 'Nenhuma transcrição disponível.' }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="loadingModalLabel">Gerando conteúdo com IA</h5>
+            </div>
+            <div class="modal-body text-center p-5">
+                <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+                <p>A IA está gerando o conteúdo para a seção. Isso pode levar alguns segundos...</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set the initial active tab based on the current step
+    const initialTab = document.querySelector('.list-group-item.active');
+    if (initialTab) {
+        const tab = new bootstrap.Tab(initialTab);
+        tab.show();
+    } else {
+        // If no active tab, show the first one
+        const firstTab = document.querySelector('.list-group-item');
+        if (firstTab) {
+            const tab = new bootstrap.Tab(firstTab);
+            tab.show();
+        }
+    }
+    
+    // Update section title on tab change
+    const listItems = document.querySelectorAll('.list-group-item');
+    listItems.forEach(item => {
+        item.addEventListener('shown.bs.tab', function (event) {
+            const sectionId = event.target.getAttribute('href').substring(1);
+            const sectionTitle = document.getElementById('sectionTitle');
+            
+            switch(sectionId) {
+                case 'preambulo':
+                    sectionTitle.textContent = 'Preâmbulo';
+                    break;
+                case 'palavras_chave':
+                    sectionTitle.textContent = 'Palavras-Chave';
+                    break;
+                case 'apresentacao_demanda':
+                    sectionTitle.textContent = 'Apresentação da Demanda';
+                    break;
+                case 'objeto_pericia':
+                    sectionTitle.textContent = 'Objeto da Perícia';
+                    break;
+                case 'metodologia':
+                    sectionTitle.textContent = 'Metodologia';
+                    break;
+                case 'descricao':
+                    sectionTitle.textContent = 'Descrição';
+                    break;
+                case 'discussao':
+                    sectionTitle.textContent = 'Discussão';
+                    break;
+                case 'conclusao':
+                    sectionTitle.textContent = 'Conclusão';
+                    break;
+                default:
+                    sectionTitle.textContent = 'Seção do Laudo';
+            }
+        });
+    });
+    
+    // Loading modal instance
+    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    
+    // Function to handle section generation
+    function setupSectionGeneration(sectionType) {
+        const generateBtn = document.getElementById(`generate_${sectionType}`);
+        const saveBtn = document.getElementById(`save_${sectionType}`);
+        const contentTextarea = document.getElementById(`${sectionType}_content`);
+        
+        if (generateBtn && contentTextarea) {
+            generateBtn.addEventListener('click', function() {
+                // Show loading modal
+                loadingModal.show();
+                
+                // Make AJAX request to generate section
+                fetch(`/report/{{ report.id }}/generate-section/${sectionType}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token() }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Hide loading modal
+                    loadingModal.hide();
+                    
+                    if (data.success) {
+                        // Update textarea with generated content
+                        contentTextarea.value = data.content;
+                        
+                        // Show success alert
+                        const successAlert = document.createElement('div');
+                        successAlert.className = 'alert alert-success alert-dismissible fade show mt-3';
+                        successAlert.innerHTML = `
+                            <strong>Sucesso!</strong> Conteúdo gerado com IA.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        `;
+                        contentTextarea.parentNode.appendChild(successAlert);
+                        
+                        // Add success badge to section tab
+                        const sectionTab = document.querySelector(`a[href="#${sectionType}"]`);
+                        if (sectionTab) {
+                            const badge = sectionTab.querySelector('.badge');
+                            if (!badge) {
+                                const newBadge = document.createElement('span');
+                                newBadge.className = 'badge bg-success rounded-pill';
+                                newBadge.innerHTML = '<i class="bi bi-check"></i>';
+                                sectionTab.appendChild(newBadge);
+                            }
+                        }
+                        
+                        // Update status and potentially redirect to next section
+                        // if this was the current step
+                        if ('{{ report.current_step }}' === sectionType) {
+                            const nextSection = getNextSection(sectionType);
+                            if (nextSection) {
+                                setTimeout(() => {
+                                    const nextTab = document.querySelector(`a[href="#${nextSection}"]`);
+                                    if (nextTab) {
+                                        const tab = new bootstrap.Tab(nextTab);
+                                        tab.show();
+                                    }
+                                }, 1000);
+                            }
+                        }
+                    } else {
+                        // Show error alert
+                        const errorAlert = document.createElement('div');
+                        errorAlert.className = 'alert alert-danger alert-dismissible fade show mt-3';
+                        errorAlert.innerHTML = `
+                            <strong>Erro!</strong> ${data.message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        `;
+                        contentTextarea.parentNode.appendChild(errorAlert);
+                    }
+                })
+                .catch(error => {
+                    // Hide loading modal
+                    loadingModal.hide();
+                    
+                    // Show error alert
+                    const errorAlert = document.createElement('div');
+                    errorAlert.className = 'alert alert-danger alert-dismissible fade show mt-3';
+                    errorAlert.innerHTML = `
+                        <strong>Erro!</strong> Falha na comunicação com o servidor: ${error.message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    `;
+                    contentTextarea.parentNode.appendChild(errorAlert);
+                });
+            });
+        }
+        
+        if (saveBtn && contentTextarea) {
+            saveBtn.addEventListener('click', function() {
+                // Make AJAX request to update section
+                fetch(`/report/{{ report.id }}/update-section/${sectionType}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': '{{ csrf_token() }}'
+                    },
+                    body: `content=${encodeURIComponent(contentTextarea.value)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success alert
+                        const successAlert = document.createElement('div');
+                        successAlert.className = 'alert alert-success alert-dismissible fade show mt-3';
+                        successAlert.innerHTML = `
+                            <strong>Sucesso!</strong> Conteúdo salvo com sucesso.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        `;
+                        contentTextarea.parentNode.appendChild(successAlert);
+                        
+                        // Add success badge to section tab
+                        const sectionTab = document.querySelector(`a[href="#${sectionType}"]`);
+                        if (sectionTab) {
+                            const badge = sectionTab.querySelector('.badge');
+                            if (!badge) {
+                                const newBadge = document.createElement('span');
+                                newBadge.className = 'badge bg-success rounded-pill';
+                                newBadge.innerHTML = '<i class="bi bi-check"></i>';
+                                sectionTab.appendChild(newBadge);
+                            }
+                        }
+                    } else {
+                        // Show error alert
+                        const errorAlert = document.createElement('div');
+                        errorAlert.className = 'alert alert-danger alert-dismissible fade show mt-3';
+                        errorAlert.innerHTML = `
+                            <strong>Erro!</strong> ${data.message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        `;
+                        contentTextarea.parentNode.appendChild(errorAlert);
+                    }
+                })
+                .catch(error => {
+                    // Show error alert
+                    const errorAlert = document.createElement('div');
+                    errorAlert.className = 'alert alert-danger alert-dismissible fade show mt-3';
+                    errorAlert.innerHTML = `
+                        <strong>Erro!</strong> Falha na comunicação com o servidor: ${error.message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    `;
+                    contentTextarea.parentNode.appendChild(errorAlert);
+                });
+            });
+        }
+    }
+    
+    // Function to get the next section in the sequence
+    function getNextSection(currentSection) {
+        const sections = [
+            'preambulo', 
+            'palavras_chave', 
+            'apresentacao_demanda', 
+            'objeto_pericia', 
+            'metodologia', 
+            'descricao', 
+            'discussao', 
+            'conclusao'
+        ];
+        
+        const currentIndex = sections.indexOf(currentSection);
+        if (currentIndex >= 0 && currentIndex < sections.length - 1) {
+            return sections[currentIndex + 1];
+        }
+        
+        return null;
+    }
+    
+    // Setup section generation for each section
+    setupSectionGeneration('preambulo');
+    setupSectionGeneration('palavras_chave');
+    setupSectionGeneration('apresentacao_demanda');
+    setupSectionGeneration('objeto_pericia');
+    setupSectionGeneration('metodologia');
+    setupSectionGeneration('descricao');
+    setupSectionGeneration('discussao');
+    setupSectionGeneration('conclusao');
+});
+</script>
+{% endblock %}

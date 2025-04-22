@@ -1,0 +1,171 @@
+{% extends "layout.html" %}
+
+{% block title %}Upload de Documento{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <h1>
+            <i class="bi bi-file-earmark-text"></i> Upload de Documento
+            <small class="text-muted fs-4">{{ report.title }}</small>
+        </h1>
+        <a href="{{ url_for('edit_report', report_id=report.id) }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Enviar Documento do Processo</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-info">
+                    <h5><i class="bi bi-info-circle"></i> Sobre o Upload de Documento</h5>
+                    <p class="mb-0">
+                        Faça upload do documento principal do processo (petição inicial, contestação, decisão judicial, etc.) 
+                        para análise automática. A IA extrairá informações relevantes para auxiliar na elaboração do laudo pericial.
+                    </p>
+                </div>
+                
+                {% if report.document_path %}
+                <div class="alert alert-success mb-4">
+                    <h5><i class="bi bi-check-circle"></i> Documento já enviado</h5>
+                    <p>Você já enviou um documento para este laudo. Ele foi processado e analisado.</p>
+                </div>
+                
+                <h5 class="mb-3">Substituir Documento</h5>
+                <p class="text-muted mb-3">Se desejar, você pode substituir o documento atual por um novo.</p>
+                {% else %}
+                <h5 class="mb-3">Selecione um documento para upload</h5>
+                <p class="text-muted mb-3">Formatos suportados: PDF, DOC, DOCX, TXT (máximo 16MB)</p>
+                {% endif %}
+                
+                <form method="POST" action="{{ url_for('upload_document', report_id=report.id) }}" enctype="multipart/form-data" id="documentUploadForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    
+                    <div class="mb-4">
+                        <div class="input-group">
+                            <input type="file" class="form-control" id="document" name="document" accept=".pdf,.doc,.docx,.txt" required>
+                            <label class="input-group-text" for="document"><i class="bi bi-file-earmark"></i></label>
+                        </div>
+                        <div class="form-text">Selecione um arquivo que contenha informações relevantes sobre o processo.</div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary" id="uploadBtn">
+                            <i class="bi bi-cloud-upload"></i> Enviar Documento
+                        </button>
+                        <a href="{{ url_for('edit_report', report_id=report.id) }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-lg"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Sobre a Análise de Documentos</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row">
+                    <div class="col-md-6 mb-4 mb-md-0">
+                        <h6><i class="bi bi-search text-primary"></i> O que o sistema analisa:</h6>
+                        <ul class="mt-2">
+                            <li>Número do processo</li>
+                            <li>Identificação das partes envolvidas</li>
+                            <li>Informações sobre o juízo</li>
+                            <li>Quesitos periciais</li>
+                            <li>Contexto do processo</li>
+                            <li>Elementos para o objeto da perícia</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="bi bi-info-circle-fill text-primary"></i> Dicas para melhores resultados:</h6>
+                        <ul class="mt-2">
+                            <li>Envie documentos com texto extraível (não digitalizados)</li>
+                            <li>PDF pesquisáveis funcionam melhor</li>
+                            <li>Documentos com estrutura clara e organizada</li>
+                            <li>Inclua documentos que contenham os quesitos periciais</li>
+                            <li>Verifique se o arquivo não está corrompido ou protegido</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="loadingModalLabel">Enviando e Processando Documento</h5>
+            </div>
+            <div class="modal-body text-center p-5">
+                <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+                <p class="mb-1">Enviando documento e extraindo informações...</p>
+                <p class="mb-0 text-muted small">Esse processo pode demorar alguns minutos, dependendo do tamanho e complexidade do documento.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('documentUploadForm');
+    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    
+    if (form) {
+        form.addEventListener('submit', function() {
+            // Show loading modal when form is submitted
+            loadingModal.show();
+        });
+    }
+    
+    // File validation
+    const fileInput = document.getElementById('document');
+    const uploadBtn = document.getElementById('uploadBtn');
+    
+    if (fileInput && uploadBtn) {
+        fileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                const file = this.files[0];
+                const fileSize = file.size / 1024 / 1024; // Convert to MB
+                const fileName = file.name;
+                const fileExt = fileName.split('.').pop().toLowerCase();
+                
+                // Check file extension
+                const validExts = ['pdf', 'doc', 'docx', 'txt'];
+                if (!validExts.includes(fileExt)) {
+                    alert('Formato de arquivo inválido. Formatos aceitos: PDF, DOC, DOCX, TXT');
+                    this.value = '';
+                    uploadBtn.disabled = true;
+                    return;
+                }
+                
+                // Check file size (max 16MB)
+                if (fileSize > 16) {
+                    alert('O arquivo é muito grande (máximo 16MB)');
+                    this.value = '';
+                    uploadBtn.disabled = true;
+                    return;
+                }
+                
+                uploadBtn.disabled = false;
+            } else {
+                uploadBtn.disabled = true;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
