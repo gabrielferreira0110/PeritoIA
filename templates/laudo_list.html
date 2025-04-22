@@ -1,0 +1,130 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        <!-- Sidebar de navegação -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Menu do Perito</h5>
+            </div>
+            <div class="list-group list-group-flush">
+                <a href="{{ url_for('dashboard') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                </a>
+                <a href="{{ url_for('laudo_list') }}" class="list-group-item list-group-item-action active">
+                    <i class="fas fa-file-medical me-2"></i> Meus Laudos
+                </a>
+                <a href="{{ url_for('laudo_create') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-plus me-2"></i> Novo Laudo
+                </a>
+            </div>
+        </div>
+        
+        <!-- Filtros -->
+        <div class="card shadow mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Filtrar</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Status</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="filter-todos" checked>
+                        <label class="form-check-label" for="filter-todos">
+                            Todos
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="filter-completos">
+                        <label class="form-check-label" for="filter-completos">
+                            Completos
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="filter-incompletos">
+                        <label class="form-check-label" for="filter-incompletos">
+                            Em andamento
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="search" class="form-label">Buscar</label>
+                    <input type="text" class="form-control" id="search" placeholder="Título do laudo...">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <!-- Cabeçalho -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">
+                <i class="fas fa-file-medical text-primary me-2"></i>
+                Meus Laudos
+            </h2>
+            <a href="{{ url_for('laudo_create') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i> Novo Laudo
+            </a>
+        </div>
+        
+        <!-- Lista de Laudos -->
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+            {% if laudos %}
+                {% for laudo in laudos %}
+                    <div class="col">
+                        <div class="card shadow h-100 laudo-card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">{{ laudo.title }}</h5>
+                                <span class="badge bg-{{ 'success' if laudo.status == 'completo' else 'warning' }}">
+                                    {{ 'Completo' if laudo.status == 'completo' else 'Em andamento' }}
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar-alt me-1"></i> Criado em: {{ laudo.created_at.strftime('%d/%m/%Y') }}
+                                    </small>
+                                </div>
+                                <div class="mb-3">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i> Última atualização: {{ laudo.updated_at.strftime('%d/%m/%Y %H:%M') }}
+                                    </small>
+                                </div>
+                                
+                                {% if laudo.status == 'incompleto' %}
+                                    <div class="mb-3">
+                                        <small class="text-muted">
+                                            <i class="fas fa-tasks me-1"></i> Etapa atual: {{ laudo.current_stage }}
+                                        </small>
+                                    </div>
+                                {% endif %}
+                                
+                                <div class="d-grid gap-2">
+                                    <a href="{{ url_for('laudo_view', laudo_id=laudo.id) }}" class="btn btn-primary">
+                                        <i class="fas fa-eye me-1"></i> Ver Laudo
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12">
+                    <div class="card shadow">
+                        <div class="card-body text-center py-5">
+                            <i class="fas fa-file-alt fa-4x text-muted mb-3"></i>
+                            <h5>Nenhum laudo encontrado</h5>
+                            <p>Você ainda não tem nenhum laudo pericial. Que tal criar um novo?</p>
+                            <a href="{{ url_for('laudo_create') }}" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i> Criar Primeiro Laudo
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

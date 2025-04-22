@@ -1,0 +1,264 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        <!-- Navegação lateral -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Seções do Laudo</h5>
+            </div>
+            <div class="list-group list-group-flush">
+                {% set secoes_titulos = {
+                    'preambulo': 'Preâmbulo',
+                    'palavras_chave': 'Palavras-Chave',
+                    'apresentacao_demanda': 'Apresentação da Demanda',
+                    'objeto_pericia': 'Objeto da Perícia',
+                    'metodologia': 'Metodologia',
+                    'descricao': 'Descrição',
+                    'discussao': 'Discussão',
+                    'conclusao': 'Conclusão'
+                } %}
+                
+                {% for secao in secoes %}
+                    <a href="{{ url_for('edit_secao', laudo_id=laudo.id, secao_tipo=secao.secao_tipo) }}" 
+                       class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        {{ secoes_titulos.get(secao.secao_tipo, secao.secao_tipo) }}
+                        {% if secao.completed %}
+                            <span class="badge bg-success rounded-pill">
+                                <i class="fas fa-check"></i>
+                            </span>
+                        {% endif %}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Arquivos do laudo -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Arquivos</h5>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="addFileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="addFileDropdown">
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('upload_processo', laudo_id=laudo.id) }}">
+                                <i class="fas fa-file-pdf me-2"></i> Anexar Processo
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('upload_audio', laudo_id=laudo.id) }}">
+                                <i class="fas fa-microphone me-2"></i> Anexar Áudio
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="list-group list-group-flush">
+                {% if arquivos %}
+                    {% for arquivo in arquivos %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    {% if arquivo.filetype == 'documento' %}
+                                        <i class="fas fa-file-pdf text-danger me-2"></i>
+                                    {% elif arquivo.filetype == 'audio' %}
+                                        <i class="fas fa-file-audio text-primary me-2"></i>
+                                    {% endif %}
+                                    <span>{{ arquivo.filename }}</span>
+                                </div>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ url_for('download_arquivo', arquivo_id=arquivo.id) }}" class="btn btn-outline-primary">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                    {% if arquivo.filetype == 'audio' and arquivo.transcricao %}
+                                        <a href="{{ url_for('view_transcricao', arquivo_id=arquivo.id) }}" class="btn btn-outline-info">
+                                            <i class="fas fa-file-alt"></i>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% if arquivo.filetype == 'audio' %}
+                                <div class="mt-2">
+                                    <small class="text-muted">
+                                        {% if arquivo.processed %}
+                                            <span class="text-success">
+                                                <i class="fas fa-check-circle me-1"></i> Áudio transcrito
+                                            </span>
+                                        {% else %}
+                                            <span class="text-warning">
+                                                <i class="fas fa-clock me-1"></i> Aguardando transcrição
+                                            </span>
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="list-group-item text-center py-3">
+                        <p class="mb-0 text-muted">Nenhum arquivo anexado</p>
+                        <div class="mt-2">
+                            <a href="{{ url_for('upload_processo', laudo_id=laudo.id) }}" class="btn btn-sm btn-outline-primary me-2">
+                                <i class="fas fa-file-pdf me-1"></i> Anexar Processo
+                            </a>
+                            <a href="{{ url_for('upload_audio', laudo_id=laudo.id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-microphone me-1"></i> Anexar Áudio
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <!-- Cabeçalho do laudo -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">{{ laudo.title }}</h4>
+                <span class="badge bg-{{ 'success' if laudo.status == 'completo' else 'warning' }} fs-6">
+                    {{ 'Completo' if laudo.status == 'completo' else 'Em andamento' }}
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-2">
+                            <strong><i class="fas fa-calendar-alt me-2"></i> Criado em:</strong> 
+                            {{ laudo.created_at.strftime('%d/%m/%Y %H:%M') }}
+                        </p>
+                        <p class="mb-2">
+                            <strong><i class="fas fa-clock me-2"></i> Última atualização:</strong> 
+                            {{ laudo.updated_at.strftime('%d/%m/%Y %H:%M') }}
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-2">
+                            <strong><i class="fas fa-user me-2"></i> Perito:</strong> 
+                            {{ current_user.username }}
+                        </p>
+                        {% if laudo.status == 'incompleto' %}
+                            <p class="mb-2">
+                                <strong><i class="fas fa-tasks me-2"></i> Etapa atual:</strong> 
+                                {{ laudo.current_stage }}
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Barra de progresso -->
+                <div class="mt-3">
+                    <h6>Progresso da Elaboração</h6>
+                    <div class="progress" style="height: 20px;">
+                        {% set completed = secoes|selectattr('completed', 'eq', true)|list|length %}
+                        {% set total = secoes|length %}
+                        {% set percentage = (completed / total * 100)|int %}
+                        <div class="progress-bar bg-success" role="progressbar" 
+                             style="width: {{ percentage }}%;" 
+                             aria-valuenow="{{ percentage }}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
+                            {{ percentage }}%
+                        </div>
+                    </div>
+                    <div class="text-end mt-1">
+                        <small class="text-muted">{{ completed }} de {{ total }} seções concluídas</small>
+                    </div>
+                </div>
+                
+                <!-- Ações disponíveis -->
+                <div class="mt-4 d-flex justify-content-end">
+                    {% if laudo.status == 'incompleto' %}
+                        <a href="{{ url_for('gerar_relatorio', laudo_id=laudo.id) }}" class="btn btn-success me-2">
+                            <i class="fas fa-file-word me-1"></i> Gerar Relatório Final
+                        </a>
+                    {% else %}
+                        <form action="{{ url_for('gerar_docx', laudo_id=laudo.id) }}" method="POST" class="me-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-file-word me-1"></i> Baixar Documento DOCX
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Visão geral das seções -->
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Visão Geral do Laudo</h5>
+            </div>
+            <div class="card-body">
+                <div class="accordion" id="secoesSummaryAccordion">
+                    {% set secoes_titulos = {
+                        'preambulo': 'Preâmbulo',
+                        'palavras_chave': 'Palavras-Chave',
+                        'apresentacao_demanda': 'Apresentação da Demanda',
+                        'objeto_pericia': 'Objeto da Perícia',
+                        'metodologia': 'Metodologia',
+                        'descricao': 'Descrição',
+                        'discussao': 'Discussão',
+                        'conclusao': 'Conclusão'
+                    } %}
+                    
+                    {% for secao in secoes %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading{{ secao.secao_tipo }}">
+                                <button class="accordion-button {{ 'collapsed' if not secao.completed }}" 
+                                        type="button" 
+                                        data-bs-toggle="collapse" 
+                                        data-bs-target="#collapse{{ secao.secao_tipo }}" 
+                                        aria-expanded="{{ 'true' if secao.completed else 'false' }}" 
+                                        aria-controls="collapse{{ secao.secao_tipo }}">
+                                    <div class="d-flex justify-content-between align-items-center w-100 me-3">
+                                        <span>{{ secoes_titulos.get(secao.secao_tipo, secao.secao_tipo) }}</span>
+                                        {% if secao.completed %}
+                                            <span class="badge bg-success">Completo</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Pendente</span>
+                                        {% endif %}
+                                    </div>
+                                </button>
+                            </h2>
+                            <div id="collapse{{ secao.secao_tipo }}" 
+                                 class="accordion-collapse collapse {{ 'show' if secao.completed }}" 
+                                 aria-labelledby="heading{{ secao.secao_tipo }}" 
+                                 data-bs-parent="#secoesSummaryAccordion">
+                                <div class="accordion-body">
+                                    {% if secao.completed and secao.conteudo %}
+                                        <div class="content-preview">
+                                            {{ secao.conteudo|truncate(200) }}
+                                            {% if secao.conteudo|length > 200 %}
+                                                <a href="{{ url_for('edit_secao', laudo_id=laudo.id, secao_tipo=secao.secao_tipo) }}">Ler mais</a>
+                                            {% endif %}
+                                        </div>
+                                    {% else %}
+                                        <div class="text-center py-3">
+                                            <p class="text-muted mb-3">Esta seção ainda não foi preenchida.</p>
+                                            <a href="{{ url_for('edit_secao', laudo_id=laudo.id, secao_tipo=secao.secao_tipo) }}" class="btn btn-primary">
+                                                <i class="fas fa-edit me-1"></i> Editar Seção
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Scripts específicos para a página de visualização de laudo
+    document.addEventListener('DOMContentLoaded', function() {
+        // Aqui ficaria alguma lógica específica para esta página, se necessário
+    });
+</script>
+{% endblock %}

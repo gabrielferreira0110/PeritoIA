@@ -1,0 +1,109 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        <!-- Navegação lateral -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Seções do Laudo</h5>
+            </div>
+            <div class="list-group list-group-flush">
+                {% set secoes_titulos = {
+                    'preambulo': 'Preâmbulo',
+                    'palavras_chave': 'Palavras-Chave',
+                    'apresentacao_demanda': 'Apresentação da Demanda',
+                    'objeto_pericia': 'Objeto da Perícia',
+                    'metodologia': 'Metodologia',
+                    'descricao': 'Descrição',
+                    'discussao': 'Discussão',
+                    'conclusao': 'Conclusão'
+                } %}
+                
+                {% for s in secoes_titulos %}
+                    <a href="{{ url_for('edit_secao', laudo_id=laudo.id, secao_tipo=s) }}" 
+                       class="list-group-item list-group-item-action {{ 'active' if s == secao.secao_tipo }}">
+                        {{ secoes_titulos[s] }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Dicas para edição -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Dicas para {{ secao_titulo }}</h5>
+            </div>
+            <div class="card-body">
+                {% if secao.secao_tipo == 'preambulo' %}
+                    <p><i class="fas fa-info-circle text-primary me-2"></i> O preâmbulo deve conter a introdução formal do laudo, identificando o perito, o objeto da perícia e o número do processo.</p>
+                {% elif secao.secao_tipo == 'palavras_chave' %}
+                    <p><i class="fas fa-info-circle text-primary me-2"></i> Liste as palavras-chave mais relevantes relacionadas ao tema da perícia, facilitando a indexação do documento.</p>
+                {% elif secao.secao_tipo == 'apresentacao_demanda' %}
+                    <p><i class="fas fa-info-circle text-primary me-2"></i> Apresente o contexto da perícia, explicando brevemente o caso e a razão pela qual a perícia foi solicitada.</p>
+                {% elif secao.secao_tipo == 'objeto_pericia' %}
+                    <p><i class="fas fa-info-circle text-primary me-2"></i> Defina claramente qual é o objeto da perícia, ou seja, o que está sendo analisado ou avaliado.</p>
+                {% elif secao.secao_tipo == 'metodologia' %}
+                    <p><i class="fas fa-info-circle text-primary me-2"></i> Descreva os métodos, técnicas e procedimentos utilizados durante a perícia, fundamentando seu trabalho.</p>
+                {% elif secao.secao_tipo == 'descricao' %}
+                    <p><i class="fas fa-info-circle text-primary me-2"></i> Faça uma descrição detalhada dos fatos, objetos ou situações observadas durante a perícia.</p>
+                {% elif secao.secao_tipo == 'discussao' %}
+                    <p><i class="fas fa-info-circle text-primary me-2"></i> Analise os achados da perícia à luz do conhecimento técnico-científico, correlacionando com os quesitos e evidências.</p>
+                {% elif secao.secao_tipo == 'conclusao' %}
+                    <p><i class="fas fa-info-circle text-primary me-2"></i> Apresente as conclusões objetivas da perícia, respondendo aos quesitos formulados pelas partes ou pelo juízo.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <!-- Cabeçalho da edição -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">{{ secao_titulo }}</h4>
+                <a href="{{ url_for('laudo_view', laudo_id=laudo.id) }}" class="btn btn-sm btn-light">
+                    <i class="fas fa-arrow-left me-1"></i> Voltar ao Laudo
+                </a>
+            </div>
+            <div class="card-body">
+                <!-- Assistente IA -->
+                <div class="ai-generation-area mb-4">
+                    <div class="d-flex align-items-start">
+                        <div class="flex-shrink-0 me-3">
+                            <i class="fas fa-robot fa-2x text-primary"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h5>Assistente de IA</h5>
+                            <p>Utilize a inteligência artificial para gerar conteúdo para esta seção do laudo. O conteúdo será baseado nas informações do processo e transcrições de áudio.</p>
+                            <button class="btn btn-ai btn-gerar-secao" data-secao="{{ secao.secao_tipo }}" data-laudo="{{ laudo.id }}">
+                                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                <span class="btn-text">Gerar com IA</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Formulário de edição -->
+                <form method="POST" action="" novalidate>
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        <label for="conteudo" class="form-label">Conteúdo da Seção</label>
+                        {{ form.conteudo(class="form-control", id="conteudo-" + secao.secao_tipo, rows="12") }}
+                        {% for error in form.conteudo.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-end">
+                        <a href="{{ url_for('laudo_view', laudo_id=laudo.id) }}" class="btn btn-secondary me-2">
+                            Cancelar
+                        </a>
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

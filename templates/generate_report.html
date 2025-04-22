@@ -1,0 +1,159 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-file-word me-2"></i>
+                    Gerar Relatório Final
+                </h4>
+                <a href="{{ url_for('laudo_view', laudo_id=laudo.id) }}" class="btn btn-sm btn-light">
+                    <i class="fas fa-arrow-left me-1"></i> Voltar ao Laudo
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-primary mb-4">
+                    <div class="d-flex">
+                        <div class="flex-shrink-0 me-3">
+                            <i class="fas fa-info-circle fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5>Sobre a Geração do Documento</h5>
+                            <p class="mb-0">
+                                O sistema irá gerar um documento DOCX completo com todas as seções do laudo pericial.
+                                Verifique se todas as seções estão concluídas antes de gerar o documento final.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Resumo das seções -->
+                <h5 class="mb-3">Status das Seções</h5>
+                <div class="table-responsive mb-4">
+                    <table class="table table-bordered">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>Seção</th>
+                                <th width="100">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set secoes_titulos = {
+                                'preambulo': 'Preâmbulo',
+                                'palavras_chave': 'Palavras-Chave',
+                                'apresentacao_demanda': 'Apresentação da Demanda',
+                                'objeto_pericia': 'Objeto da Perícia',
+                                'metodologia': 'Metodologia',
+                                'descricao': 'Descrição',
+                                'discussao': 'Discussão',
+                                'conclusao': 'Conclusão'
+                            } %}
+                            
+                            {% for secao in secoes %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('edit_secao', laudo_id=laudo.id, secao_tipo=secao.secao_tipo) }}">
+                                            {{ secoes_titulos.get(secao.secao_tipo, secao.secao_tipo) }}
+                                        </a>
+                                    </td>
+                                    <td class="text-center">
+                                        {% if secao.completed %}
+                                            <span class="badge bg-success">Completa</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Pendente</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Opções de formatação (opcional) -->
+                <h5 class="mb-3">Opções de Formatação</h5>
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="includePageNumbers" checked>
+                                <label class="form-check-label" for="includePageNumbers">
+                                    Incluir numeração de páginas
+                                </label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="includeTOC" checked>
+                                <label class="form-check-label" for="includeTOC">
+                                    Incluir sumário
+                                </label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="includeHeader" checked>
+                                <label class="form-check-label" for="includeHeader">
+                                    Incluir cabeçalho com informações do laudo
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Botão de geração -->
+                <form action="{{ url_for('gerar_docx', laudo_id=laudo.id) }}" method="POST">
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-lg btn-success">
+                            <i class="fas fa-file-word me-2"></i>
+                            Gerar Documento DOCX
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Aviso -->
+                <div class="alert alert-warning mt-4">
+                    <div class="d-flex">
+                        <div class="flex-shrink-0 me-3">
+                            <i class="fas fa-exclamation-triangle fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5>Importante</h5>
+                            <p class="mb-0">
+                                Após a geração do documento, o status do laudo será alterado para "Completo".
+                                Você ainda poderá fazer alterações nas seções e gerar novamente o documento se necessário.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Verificar se todas as seções estão completas
+        const secoesPendentes = document.querySelectorAll('.badge.bg-warning').length;
+        const submitButton = document.querySelector('button[type="submit"]');
+        
+        if (secoesPendentes > 0 && submitButton) {
+            submitButton.setAttribute('title', 'Existem seções pendentes');
+            
+            // Adicionar aviso antes do submit
+            const form = document.querySelector('form');
+            form.addEventListener('submit', function(e) {
+                if (secoesPendentes > 0) {
+                    if (!confirm(`Existem ${secoesPendentes} seções pendentes. Deseja continuar mesmo assim?`)) {
+                        e.preventDefault();
+                        return false;
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,100 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="px-4 py-5 my-5 text-center">
+    <h1 class="display-5 fw-bold text-body-emphasis">
+        <i class="fas fa-shield-alt text-primary me-2"></i>
+        Perito IA
+    </h1>
+    <div class="col-lg-8 mx-auto">
+        <p class="lead mb-4">
+            Sistema avançado para geração de laudos periciais com assistência de Inteligência Artificial. 
+            Agilize seu trabalho pericial com processamento de documentos, transcrição de áudio e geração 
+            de relatórios profissionais.
+        </p>
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg px-4 gap-3">
+                    <i class="fas fa-tachometer-alt me-2"></i>
+                    Acessar Painel
+                </a>
+                <a href="{{ url_for('laudo_create') }}" class="btn btn-outline-secondary btn-lg px-4">
+                    <i class="fas fa-file-medical me-2"></i>
+                    Novo Laudo
+                </a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg px-4 gap-3">
+                    <i class="fas fa-sign-in-alt me-2"></i>
+                    Entrar
+                </a>
+                <a href="{{ url_for('register') }}" class="btn btn-outline-secondary btn-lg px-4">
+                    <i class="fas fa-user-plus me-2"></i>
+                    Registrar
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="container py-4">
+    <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
+        <div class="col d-flex align-items-start">
+            <div class="icon-square text-body-emphasis bg-body-secondary d-inline-flex align-items-center justify-content-center fs-4 flex-shrink-0 me-3 p-3 rounded">
+                <i class="fas fa-robot text-primary"></i>
+            </div>
+            <div>
+                <h3 class="fs-2 text-body-emphasis">Inteligência Artificial</h3>
+                <p>Utilize o poder da IA para gerar conteúdo estruturado para suas perícias, economizando tempo e garantindo qualidade.</p>
+            </div>
+        </div>
+        <div class="col d-flex align-items-start">
+            <div class="icon-square text-body-emphasis bg-body-secondary d-inline-flex align-items-center justify-content-center fs-4 flex-shrink-0 me-3 p-3 rounded">
+                <i class="fas fa-file-alt text-primary"></i>
+            </div>
+            <div>
+                <h3 class="fs-2 text-body-emphasis">Processamento de Documentos</h3>
+                <p>Extração automática de informações relevantes a partir de documentos relacionados ao processo.</p>
+            </div>
+        </div>
+        <div class="col d-flex align-items-start">
+            <div class="icon-square text-body-emphasis bg-body-secondary d-inline-flex align-items-center justify-content-center fs-4 flex-shrink-0 me-3 p-3 rounded">
+                <i class="fas fa-microphone text-primary"></i>
+            </div>
+            <div>
+                <h3 class="fs-2 text-body-emphasis">Transcrição de Áudio</h3>
+                <p>Converta gravações de áudio em texto para utilizar em seus laudos periciais com tecnologia avançada de reconhecimento de voz.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
+        <div class="col d-flex align-items-start">
+            <div class="icon-square text-body-emphasis bg-body-secondary d-inline-flex align-items-center justify-content-center fs-4 flex-shrink-0 me-3 p-3 rounded">
+                <i class="fas fa-file-word text-primary"></i>
+            </div>
+            <div>
+                <h3 class="fs-2 text-body-emphasis">Exportação para DOCX</h3>
+                <p>Exporte seus laudos em formato DOCX profissional, pronto para impressão ou envio digital.</p>
+            </div>
+        </div>
+        <div class="col d-flex align-items-start">
+            <div class="icon-square text-body-emphasis bg-body-secondary d-inline-flex align-items-center justify-content-center fs-4 flex-shrink-0 me-3 p-3 rounded">
+                <i class="fas fa-tasks text-primary"></i>
+            </div>
+            <div>
+                <h3 class="fs-2 text-body-emphasis">Gestão de Progresso</h3>
+                <p>Acompanhe o status de cada laudo e retome seu trabalho de onde parou, sem perder informações.</p>
+            </div>
+        </div>
+        <div class="col d-flex align-items-start">
+            <div class="icon-square text-body-emphasis bg-body-secondary d-inline-flex align-items-center justify-content-center fs-4 flex-shrink-0 me-3 p-3 rounded">
+                <i class="fas fa-lock text-primary"></i>
+            </div>
+            <div>
+                <h3 class="fs-2 text-body-emphasis">Segurança</h3>
+                <p>Seus dados estão protegidos com as melhores práticas de segurança e controle de acesso.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
