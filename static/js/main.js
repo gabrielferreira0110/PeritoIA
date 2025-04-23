@@ -60,13 +60,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Função para exibir toast de notificação
     function showToast(message, type = 'info') {
-        const toastContainer = document.getElementById('toast-container');
+        let toastContainer = document.getElementById('toast-container');
         if (!toastContainer) {
             // Criar container de toast se não existir
             const container = document.createElement('div');
             container.id = 'toast-container';
             container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
             document.body.appendChild(container);
+            toastContainer = container;
         }
         
         const toastId = `toast-${Date.now()}`;
@@ -81,8 +82,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             </div>
         `;
-        
-        const toastContainer = document.getElementById('toast-container');
         toastContainer.insertAdjacentHTML('beforeend', toastHtml);
         
         const toastElement = document.getElementById(toastId);
