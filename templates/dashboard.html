@@ -1,20 +1,49 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<!-- Header com estatísticas -->
+<!-- Header moderno com estatísticas e ações rápidas -->
 <div class="row mb-4">
     <div class="col-12">
-        <div class="card bg-gradient-primary text-white shadow">
-            <div class="card-body p-4">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h1 class="display-5 fw-bold">Olá, {{ current_user.username }}!</h1>
-                        <p class="mb-0">Bem-vindo ao seu painel de controle do Perito IA.</p>
+        <div class="card shadow-lg rounded-xl border-0 overflow-hidden">
+            <div class="card-body p-0">
+                <div class="row g-0">
+                    <div class="col-lg-8 p-4" style="background: linear-gradient(135deg, var(--primary-600), var(--primary-700))">
+                        <div class="text-white">
+                            <h2 class="fw-bold mb-1">Bem-vindo de volta{% if current_user.is_authenticated %}, {{ current_user.username }}{% endif %}!</h2>
+                            <p class="mb-3 opacity-75">Aqui está um resumo da sua atividade recente</p>
+                            
+                            <!-- Resumo de atividades -->
+                            <div class="d-flex align-items-center mt-4">
+                                <div class="bg-white bg-opacity-10 rounded-xl p-3 me-3">
+                                    <i class="fas fa-file-alt text-white"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0">{{ laudos|default([])|selectattr('status', 'eq', 'incompleto')|list|length }} laudos em andamento</h5>
+                                    {% if laudos|default([])|selectattr('status', 'eq', 'incompleto')|list|length > 0 %}
+                                        <p class="mb-0 small opacity-75">Você tem {{ laudos|default([])|selectattr('status', 'eq', 'incompleto')|list|length }} laudos que precisam de atenção</p>
+                                    {% else %}
+                                        <p class="mb-0 small opacity-75">Nenhum laudo em andamento no momento</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="text-end">
-                        <a href="{{ url_for('laudo_create') }}" class="btn btn-lg btn-light">
-                            <i class="fas fa-plus-circle me-2"></i> Novo Laudo
-                        </a>
+                    <div class="col-lg-4 bg-white p-4">
+                        <h4 class="mb-3">Ações Rápidas</h4>
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('laudo_create') }}" class="btn btn-primary">
+                                <i class="fas fa-plus-circle me-2"></i> Novo Laudo
+                            </a>
+                            <a href="{{ url_for('laudo_list') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-list me-2"></i> Ver Meus Laudos
+                            </a>
+                            {% if laudos|selectattr('status', 'eq', 'incompleto')|list|length > 0 %}
+                                {% set ultimo_laudo = laudos|selectattr('status', 'eq', 'incompleto')|sort(attribute='updated_at', reverse=true)|first %}
+                                <a href="{{ url_for('laudo_view', laudo_id=ultimo_laudo.id) }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-edit me-2"></i> Continuar Último Laudo
+                                </a>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -22,110 +51,141 @@
     </div>
 </div>
 
-<!-- Estatísticas em Cards -->
+<!-- Métricas em Cards Modernos -->
 <div class="row mb-4">
     <!-- Total de Laudos -->
     <div class="col-lg-4 col-md-6 mb-4">
-        <div class="card border-0 shadow h-100">
-            <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <h2 class="counter-value display-4 fw-bold text-primary">{{ laudos|length }}</h2>
-                        <p class="mb-0 text-muted">Total de Laudos</p>
-                    </div>
-                    <div class="icon-box bg-primary bg-opacity-10 rounded-circle p-3">
-                        <i class="fas fa-file-alt fa-2x text-primary"></i>
-                    </div>
+        <div class="metric-card shadow-sm rounded-xl bg-white border-0">
+            <div class="metric-card-header">
+                <div>
+                    <p class="metric-card-label">Total de Laudos</p>
+                    <h3 class="metric-card-value text-primary">{{ laudos|length }}</h3>
                 </div>
-                <div class="progress mt-3" style="height: 8px;">
-                    <div class="progress-bar bg-primary" style="width: 100%"></div>
+                <div class="metric-card-icon bg-primary-light text-primary">
+                    <i class="fas fa-file-alt"></i>
                 </div>
             </div>
+            {% if laudos|length > 0 %}
+                <p class="text-muted small mb-2">Criados nos últimos 30 dias</p>
+                <div class="progress rounded-pill" style="height: 6px;">
+                    <div class="progress-bar bg-primary" style="width: 100%;"></div>
+                </div>
+            {% else %}
+                <div class="alert alert-info rounded-xl py-2 small">
+                    <i class="fas fa-info-circle me-1"></i> Crie seu primeiro laudo para iniciar
+                </div>
+            {% endif %}
         </div>
     </div>
     
-    <!-- Laudos Completos -->
+    <!-- Laudos Concluídos -->
     <div class="col-lg-4 col-md-6 mb-4">
-        <div class="card border-0 shadow h-100">
-            <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <h2 class="counter-value display-4 fw-bold text-success">{{ laudos|selectattr('status', 'eq', 'completo')|list|length }}</h2>
-                        <p class="mb-0 text-muted">Laudos Completos</p>
-                    </div>
-                    <div class="icon-box bg-success bg-opacity-10 rounded-circle p-3">
-                        <i class="fas fa-check-circle fa-2x text-success"></i>
-                    </div>
+        <div class="metric-card shadow-sm rounded-xl bg-white border-0">
+            <div class="metric-card-header">
+                <div>
+                    <p class="metric-card-label">Laudos Concluídos</p>
+                    <h3 class="metric-card-value text-success">{{ laudos|selectattr('status', 'eq', 'completo')|list|length }}</h3>
                 </div>
-                {% set completos = laudos|selectattr('status', 'eq', 'completo')|list|length %}
-                {% set total = laudos|length %}
-                {% if total > 0 %}
-                    {% set porcentagem = (completos / total * 100)|int %}
-                {% else %}
-                    {% set porcentagem = 0 %}
-                {% endif %}
-                <div class="progress mt-3" style="height: 8px;">
+                <div class="metric-card-icon bg-success-light text-success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+            </div>
+            {% set completos = laudos|default([])|selectattr('status', 'eq', 'completo')|list|length %}
+            {% set total = laudos|default([])|length %}
+            {% if total > 0 %}
+                {% set porcentagem = (completos / total * 100)|int if total > 0 else 0 %}
+                <p class="text-muted small mb-2">{{ porcentagem }}% do total de laudos</p>
+                <div class="progress rounded-pill progress-thin">
                     <div class="progress-bar bg-success" style="width: {{ porcentagem }}%"></div>
                 </div>
-                <p class="text-muted small mt-2 mb-0">{{ porcentagem }}% dos laudos estão completos</p>
-            </div>
+            {% else %}
+                <div class="alert alert-info rounded-xl py-2 small">
+                    <i class="fas fa-info-circle me-1"></i> Nenhum laudo concluído ainda
+                </div>
+            {% endif %}
         </div>
     </div>
     
     <!-- Laudos em Andamento -->
     <div class="col-lg-4 col-md-6 mb-4">
-        <div class="card border-0 shadow h-100">
-            <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <h2 class="counter-value display-4 fw-bold text-warning">{{ laudos|selectattr('status', 'eq', 'incompleto')|list|length }}</h2>
-                        <p class="mb-0 text-muted">Em Andamento</p>
-                    </div>
-                    <div class="icon-box bg-warning bg-opacity-10 rounded-circle p-3">
-                        <i class="fas fa-clock fa-2x text-warning"></i>
-                    </div>
+        <div class="metric-card shadow-sm rounded-xl bg-white border-0">
+            <div class="metric-card-header">
+                <div>
+                    <p class="metric-card-label">Aguardando Atenção</p>
+                    <h3 class="metric-card-value text-warning">{{ laudos|selectattr('status', 'eq', 'incompleto')|list|length }}</h3>
                 </div>
-                {% set incompletos = laudos|selectattr('status', 'eq', 'incompleto')|list|length %}
-                {% set total = laudos|length %}
-                {% if total > 0 %}
-                    {% set porcentagem = (incompletos / total * 100)|int %}
-                {% else %}
-                    {% set porcentagem = 0 %}
-                {% endif %}
-                <div class="progress mt-3" style="height: 8px;">
-                    <div class="progress-bar bg-warning" style="width: {{ porcentagem }}%"></div>
+                <div class="metric-card-icon bg-warning-light text-warning">
+                    <i class="fas fa-clock"></i>
                 </div>
-                <p class="text-muted small mt-2 mb-0">{{ porcentagem }}% dos laudos estão em andamento</p>
             </div>
+            {% set incompletos = laudos|selectattr('status', 'eq', 'incompleto')|list|length %}
+            {% if incompletos > 0 %}
+                <div class="d-flex align-items-center justify-content-between small text-muted mb-2">
+                    <span>Próximos prazos</span>
+                    <span class="badge bg-warning-light text-warning rounded-pill">{{ incompletos }} pendente{{ 's' if incompletos > 1 else '' }}</span>
+                </div>
+                <div class="progress rounded-pill" style="height: 6px;">
+                    <div class="progress-bar bg-warning" style="width: 100%;"></div>
+                </div>
+            {% else %}
+                <div class="alert alert-success rounded-xl py-2 small">
+                    <i class="fas fa-check-circle me-1"></i> Todos os laudos estão concluídos
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
 
-<!-- Gráficos e Tabela -->
+<!-- Gráficos e Tabela Modernos -->
 <div class="row">
     <!-- Gráficos -->
     <div class="col-lg-5 mb-4">
-        <div class="card shadow h-100">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i> Visão Geral</h5>
+        <div class="card shadow-sm rounded-xl border-0 h-100">
+            <div class="card-header d-flex justify-content-between align-items-center bg-white">
+                <h5 class="mb-0">Estatísticas dos Laudos</h5>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-light rounded-pill" type="button" id="chartOptionsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-xl" aria-labelledby="chartOptionsDropdown">
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-download me-2"></i> Exportar Dados</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-sync me-2"></i> Atualizar</a></li>
+                    </ul>
+                </div>
             </div>
-            <div class="card-body">
+            <div class="card-body p-4">
                 <div class="mb-4">
-                    <canvas id="statusChart" height="200"></canvas>
-                </div>
-                <div class="mt-4">
-                    <canvas id="activityChart" height="200"></canvas>
-                </div>
-                <div class="text-center mt-3">
-                    <div class="d-flex justify-content-center">
-                        <div class="me-3">
-                            <span class="badge bg-success p-2"><i class="fas fa-check"></i></span>
-                            <span class="small ms-1">Completos</span>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="text-gray-700 mb-0">Status dos Laudos</h6>
+                        <div class="badge bg-success-light text-success rounded-pill px-3 py-1">
+                            <i class="fas fa-arrow-up me-1"></i> 12% este mês
                         </div>
-                        <div>
-                            <span class="badge bg-warning p-2"><i class="fas fa-clock"></i></span>
-                            <span class="small ms-1">Em andamento</span>
-                        </div>
+                    </div>
+                    <div style="height: 180px;">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="text-gray-700 mb-0">Atividade Mensal</h6>
+                        <select class="form-select form-select-sm rounded-pill" style="width: auto;">
+                            <option>Últimos 6 meses</option>
+                            <option>Este ano</option>
+                            <option>Ano anterior</option>
+                        </select>
+                    </div>
+                    <div style="height: 180px;">
+                        <canvas id="activityChart"></canvas>
+                    </div>
+                </div>
+                <div class="mt-4 d-flex justify-content-center">
+                    <div class="d-flex align-items-center me-4">
+                        <div class="rounded-circle me-2" style="width: 10px; height: 10px; background-color: var(--success-500);"></div>
+                        <span class="small">Completos</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle me-2" style="width: 10px; height: 10px; background-color: var(--warning-500);"></div>
+                        <span class="small">Em andamento</span>
                     </div>
                 </div>
             </div>
@@ -134,89 +194,108 @@
     
     <!-- Laudos Recentes -->
     <div class="col-lg-7 mb-4">
-        <div class="card shadow h-100">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><i class="fas fa-list-alt me-2"></i> Laudos Recentes</h5>
-                <a href="{{ url_for('laudo_list') }}" class="btn btn-sm btn-light">
+        <div class="card shadow-sm rounded-xl border-0 h-100">
+            <div class="card-header d-flex justify-content-between align-items-center bg-white">
+                <h5 class="mb-0">Laudos Recentes</h5>
+                <a href="{{ url_for('laudo_list') }}" class="btn btn-sm btn-primary rounded-pill px-3">
                     Ver Todos <i class="fas fa-arrow-right ms-1"></i>
                 </a>
             </div>
-            <div class="card-body">
+            <div class="card-body p-0">
                 {% if laudos %}
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle border-0">
-                            <thead class="table-light">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
                                 <tr>
-                                    <th>Título</th>
+                                    <th class="ps-4">Título</th>
                                     <th>Status</th>
                                     <th>Progresso</th>
                                     <th>Atualizado</th>
-                                    <th>Ações</th>
+                                    <th class="text-end pe-4">Ações</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for laudo in laudos[:5] %}
                                     <tr>
-                                        <td>
+                                        <td class="ps-4">
                                             <div class="d-flex align-items-center">
-                                                <div class="icon-box rounded p-2 me-3 
+                                                <div class="rounded-xl p-2 me-3 
                                                     {% if laudo.status == 'completo' %}
-                                                        bg-success bg-opacity-10
+                                                        bg-success-light
                                                     {% else %}
-                                                        bg-warning bg-opacity-10
-                                                    {% endif %}">
+                                                        bg-warning-light
+                                                    {% endif %}
+                                                ">
                                                     <i class="fas fa-file-alt 
                                                         {% if laudo.status == 'completo' %}
                                                             text-success
                                                         {% else %}
                                                             text-warning
-                                                        {% endif %}">
-                                                    </i>
+                                                        {% endif %}
+                                                    "></i>
                                                 </div>
                                                 <div>
-                                                    <a href="{{ url_for('laudo_view', laudo_id=laudo.id) }}" class="text-decoration-none fw-bold text-primary">
+                                                    <a href="{{ url_for('laudo_view', laudo_id=laudo.id) }}" class="text-decoration-none fw-medium">
                                                         {{ laudo.title|truncate(30) }}
                                                     </a>
+                                                    <div class="small text-muted">Criado em {{ laudo.created_at.strftime('%d/%m/%Y') }}</div>
                                                 </div>
                                             </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge rounded-pill px-3 py-2 
+                                                {% if laudo.status == 'completo' %}
+                                                    bg-success-light text-success
+                                                {% else %}
+                                                    bg-warning-light text-warning
+                                                {% endif %}
+                                            ">
+                                                {% if laudo.status == 'completo' %}
+                                                    <i class="fas fa-check-circle me-1"></i> Concluído
+                                                {% else %}
+                                                    <i class="fas fa-clock me-1"></i> Em andamento
+                                                {% endif %}
+                                            </span>
                                         </td>
                                         <td>
                                             {% if laudo.status == 'completo' %}
-                                                <span class="badge bg-success rounded-pill">Completo</span>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="progress flex-grow-1 rounded-pill" style="height: 6px;">
+                                                        <div class="progress-bar bg-success" style="width: 100%;"></div>
+                                                    </div>
+                                                    <span class="ms-2 small text-success fw-medium">100%</span>
+                                                </div>
                                             {% else %}
-                                                <span class="badge bg-warning rounded-pill">Em andamento</span>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="progress flex-grow-1 rounded-pill" style="height: 6px;">
+                                                        <div class="progress-bar bg-warning" style="width: 60%;"></div>
+                                                    </div>
+                                                    <span class="ms-2 small text-warning fw-medium">60%</span>
+                                                </div>
                                             {% endif %}
                                         </td>
-                                        <td style="width: 25%;">
-                                            <div class="progress" style="height: 6px;">
-                                                {% if laudo.status == 'completo' %}
-                                                    <div class="progress-bar bg-success" style="width: 100%;"></div>
-                                                {% else %}
-                                                    {% if laudo.current_stage == 'inicio' %}
-                                                        <div class="progress-bar bg-warning" style="width: 10%;"></div>
-                                                    {% elif laudo.current_stage == 'documento_anexado' %}
-                                                        <div class="progress-bar bg-warning" style="width: 30%;"></div>
-                                                    {% elif laudo.current_stage == 'em_edicao' %}
-                                                        <div class="progress-bar bg-warning" style="width: 60%;"></div>
-                                                    {% else %}
-                                                        <div class="progress-bar bg-warning" style="width: 85%;"></div>
-                                                    {% endif %}
-                                                {% endif %}
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-history text-muted me-2 small"></i>
+                                                <span class="small">{{ laudo.updated_at.strftime('%d/%m/%Y') }}</span>
                                             </div>
                                         </td>
-                                        <td>
-                                            <span class="small text-muted">{{ laudo.updated_at.strftime('%d/%m/%Y') }}</span>
-                                        </td>
-                                        <td>
-                                            <div class="btn-group" role="group">
-                                                <a href="{{ url_for('laudo_view', laudo_id=laudo.id) }}" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="Visualizar">
+                                        <td class="text-end pe-4">
+                                            <div class="d-flex justify-content-end">
+                                                <a href="{{ url_for('laudo_view', laudo_id=laudo.id) }}" class="btn btn-sm btn-primary rounded-pill me-2" data-bs-toggle="tooltip" title="Ver Laudo">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                {% if laudo.status == 'incompleto' %}
-                                                    <a href="{{ url_for('gerar_relatorio', laudo_id=laudo.id) }}" class="btn btn-sm btn-outline-success" data-bs-toggle="tooltip" title="Gerar Relatório">
-                                                        <i class="fas fa-file-word"></i>
-                                                    </a>
-                                                {% endif %}
+                                                <div class="dropdown">
+                                                    <button class="btn btn-sm btn-light rounded-pill" type="button" data-bs-toggle="dropdown">
+                                                        <i class="fas fa-ellipsis-v"></i>
+                                                    </button>
+                                                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-xl">
+                                                        <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i> Editar</a></li>
+                                                        <li><a class="dropdown-item" href="#"><i class="fas fa-file-export me-2"></i> Exportar</a></li>
+                                                        <li><hr class="dropdown-divider"></li>
+                                                        <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash-alt me-2"></i> Excluir</a></li>
+                                                    </ul>
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>
@@ -225,12 +304,14 @@
                         </table>
                     </div>
                 {% else %}
-                    <div class="text-center py-5">
-                        <img src="https://cdn-icons-png.flaticon.com/512/6159/6159367.png" alt="Nenhum laudo" class="img-fluid mb-3" style="max-height: 150px;">
-                        <h4 class="text-muted">Você ainda não tem nenhum laudo</h4>
-                        <p class="text-muted mb-4">Comece criando seu primeiro laudo pericial agora mesmo!</p>
-                        <a href="{{ url_for('laudo_create') }}" class="btn btn-primary btn-lg">
-                            <i class="fas fa-plus-circle me-2"></i> Criar Primeiro Laudo
+                    <div class="empty-state p-5">
+                        <div class="empty-state-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <h5 class="empty-state-title">Pronto para criar seu primeiro laudo pericial?</h5>
+                        <p class="empty-state-description">Com nossa IA, você economiza 70% do tempo de elaboração de laudos periciais.</p>
+                        <a href="{{ url_for('laudo_create') }}" class="btn btn-primary rounded-pill px-4">
+                            <i class="fas fa-plus me-2"></i> Criar Primeiro Laudo
                         </a>
                     </div>
                 {% endif %}
@@ -240,55 +321,74 @@
 </div>
 
 <!-- Dicas e Recursos -->
-<div class="row mb-4">
+<div class="row mb-5">
     <div class="col-12">
-        <div class="card shadow border-0">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i> Dicas e Recursos</h5>
+        <div class="card shadow-sm rounded-xl border-0">
+            <div class="card-header bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Dicas para Laudos Eficientes</h5>
+                    <span class="badge bg-primary-light text-primary rounded-pill px-3 py-2">Novo</span>
+                </div>
             </div>
-            <div class="card-body">
+            <div class="card-body p-4">
                 <div class="row g-4">
                     <div class="col-lg-3 col-md-6">
-                        <div class="card h-100 border-0 shadow-sm">
-                            <div class="card-body text-center">
-                                <div class="rounded-circle bg-primary bg-opacity-10 p-3 d-inline-block mb-3">
-                                    <i class="fas fa-robot fa-2x text-primary"></i>
+                        <div class="card h-100 border-0 rounded-xl shadow-sm hover-lift">
+                            <div class="card-body p-4">
+                                <div class="d-flex">
+                                    <div class="rounded-xl bg-primary-light p-3 me-3">
+                                        <i class="fas fa-robot text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="fw-medium">Use a IA</h5>
+                                        <p class="small text-muted mb-0">Economize até 70% do tempo na elaboração de laudos com nossa IA especializada.</p>
+                                    </div>
                                 </div>
-                                <h5>Utilize a IA</h5>
-                                <p class="small text-muted">Use o botão "Gerar com IA" em cada seção para criar conteúdo automaticamente.</p>
                             </div>
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-6">
-                        <div class="card h-100 border-0 shadow-sm">
-                            <div class="card-body text-center">
-                                <div class="rounded-circle bg-success bg-opacity-10 p-3 d-inline-block mb-3">
-                                    <i class="fas fa-microphone fa-2x text-success"></i>
+                        <div class="card h-100 border-0 rounded-xl shadow-sm hover-lift">
+                            <div class="card-body p-4">
+                                <div class="d-flex">
+                                    <div class="rounded-xl bg-success-light p-3 me-3">
+                                        <i class="fas fa-file-upload text-success"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="fw-medium">Anexe Documentos</h5>
+                                        <p class="small text-muted mb-0">Adicione documentos para extração automática de informações relevantes.</p>
+                                    </div>
                                 </div>
-                                <h5>Áudios Claros</h5>
-                                <p class="small text-muted">Grave áudios em ambiente silencioso e fale pausadamente para transcrição precisa.</p>
                             </div>
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-6">
-                        <div class="card h-100 border-0 shadow-sm">
-                            <div class="card-body text-center">
-                                <div class="rounded-circle bg-warning bg-opacity-10 p-3 d-inline-block mb-3">
-                                    <i class="fas fa-file-pdf fa-2x text-warning"></i>
+                        <div class="card h-100 border-0 rounded-xl shadow-sm hover-lift">
+                            <div class="card-body p-4">
+                                <div class="d-flex">
+                                    <div class="rounded-xl bg-warning-light p-3 me-3">
+                                        <i class="fas fa-microphone text-warning"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="fw-medium">Transcreva Áudios</h5>
+                                        <p class="small text-muted mb-0">Converta gravações em texto com nossa tecnologia de reconhecimento de voz.</p>
+                                    </div>
                                 </div>
-                                <h5>Documentos</h5>
-                                <p class="small text-muted">Anexe arquivos PDF com textos legíveis para melhor extração de informações.</p>
                             </div>
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-6">
-                        <div class="card h-100 border-0 shadow-sm">
-                            <div class="card-body text-center">
-                                <div class="rounded-circle bg-info bg-opacity-10 p-3 d-inline-block mb-3">
-                                    <i class="fas fa-edit fa-2x text-info"></i>
+                        <div class="card h-100 border-0 rounded-xl shadow-sm hover-lift">
+                            <div class="card-body p-4">
+                                <div class="d-flex">
+                                    <div class="rounded-xl bg-info-light p-3 me-3">
+                                        <i class="fas fa-edit text-info"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="fw-medium">Revise Conteúdo</h5>
+                                        <p class="small text-muted mb-0">Sempre revise o conteúdo gerado pela IA antes de finalizar seu laudo.</p>
+                                    </div>
                                 </div>
-                                <h5>Revise Conteúdo</h5>
-                                <p class="small text-muted">Sempre revise e edite o conteúdo gerado pela IA antes de finalizar o laudo.</p>
                             </div>
                         </div>
                     </div>
@@ -300,102 +400,159 @@
 {% endblock %}
 
 {% block scripts %}
+<!-- Dados para os gráficos via data attributes -->
+<div id="chart-data" 
+    data-completos="{{ laudos|default([])|selectattr('status', 'eq', 'completo')|list|length }}"
+    data-em-andamento="{{ laudos|default([])|selectattr('status', 'eq', 'incompleto')|list|length }}"
+    data-total-laudos="{{ laudos|default([])|length }}"
+    style="display: none;"></div>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 <script>
+// Dados para os gráficos (carregados de data attributes)
+var chartData = {};
+var dataElement = document.getElementById('chart-data');
+
+// Carregando dados dos data attributes
+chartData.completos = parseInt(dataElement.getAttribute('data-completos') || 0);
+chartData.emAndamento = parseInt(dataElement.getAttribute('data-em-andamento') || 0);
+chartData.totalLaudos = parseInt(dataElement.getAttribute('data-total-laudos') || 0);
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Dados para os gráficos
-    const completos = {{ laudos|selectattr('status', 'eq', 'completo')|list|length }};
-    const emAndamento = {{ laudos|selectattr('status', 'eq', 'incompleto')|list|length }};
     
     // Gráfico de status (tipo donut)
-    const statusCtx = document.getElementById('statusChart').getContext('2d');
-    const statusChart = new Chart(statusCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Completos', 'Em andamento'],
-            datasets: [{
-                data: [completos, emAndamento],
-                backgroundColor: [
-                    'rgba(40, 167, 69, 0.8)',
-                    'rgba(255, 193, 7, 0.8)'
-                ],
-                borderColor: [
-                    'rgba(40, 167, 69, 1)',
-                    'rgba(255, 193, 7, 1)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        boxWidth: 15,
-                        padding: 15
+    const statusCtx = document.getElementById('statusChart');
+    if (statusCtx) {
+        const statusChart = new Chart(statusCtx.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Concluídos', 'Em andamento'],
+                datasets: [{
+                    data: [chartData.completos, chartData.emAndamento],
+                    backgroundColor: [
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(245, 158, 11, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(16, 185, 129, 1)',
+                        'rgba(245, 158, 11, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 12,
+                            padding: 15,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                        padding: 10,
+                        cornerRadius: 6,
+                        caretSize: 6
                     }
                 },
-                title: {
-                    display: true,
-                    text: 'Status dos Laudos',
-                    font: {
-                        size: 16
-                    }
-                }
-            },
-            cutout: '70%'
-        }
-    });
+                cutout: '75%'
+            }
+        });
+    }
     
     // Gráfico de atividade
-    const activityCtx = document.getElementById('activityChart').getContext('2d');
-    const activityChart = new Chart(activityCtx, {
-        type: 'bar',
-        data: {
-            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
-            datasets: [{
-                label: 'Laudos Criados',
-                data: [2, 3, 1, 4, {{ laudos|length }}, 0],
-                backgroundColor: 'rgba(13, 110, 253, 0.7)',
-                borderColor: 'rgba(13, 110, 253, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                title: {
-                    display: true,
-                    text: 'Atividade Mensal',
-                    font: {
-                        size: 16
-                    }
-                }
+    const activityCtx = document.getElementById('activityChart');
+    if (activityCtx) {
+        const activityChart = new Chart(activityCtx.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+                datasets: [{
+                    label: 'Laudos Criados',
+                    data: [2, 3, 1, 4, chartData.totalLaudos, 0],
+                    backgroundColor: 'rgba(99, 102, 241, 0.7)',
+                    borderColor: 'rgba(99, 102, 241, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    maxBarThickness: 12
+                }]
             },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        precision: 0
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                        padding: 10,
+                        cornerRadius: 6,
+                        caretSize: 6
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0,
+                            stepSize: 1
+                        },
+                        grid: {
+                            borderDash: [2, 2]
+                        }
                     }
                 }
             }
-        }
-    });
+        });
+    }
     
     // Inicializar tooltips
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function(tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl, {
-            boundary: document.body
-        });
-    });
+    try {
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        if (tooltipTriggerList.length > 0 && typeof bootstrap !== 'undefined') {
+            tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+                new bootstrap.Tooltip(tooltipTriggerEl, {
+                    boundary: document.body
+                });
+            });
+        }
+    } catch (e) {
+        console.error('Error initializing tooltips:', e);
+    }
+    
+    // Adicionar efeito hover aos cards
+    try {
+        const hoverCards = document.querySelectorAll('.hover-lift');
+        if (hoverCards.length > 0) {
+            hoverCards.forEach(function(card) {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                    this.style.boxShadow = '0 10px 20px rgba(0, 0, 0, 0.1)';
+                    this.style.transition = 'all 0.3s ease';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
+                    this.style.transition = 'all 0.3s ease';
+                });
+            });
+        }
+    } catch (e) {
+        console.error('Error initializing hover effects:', e);
+    }
 });
 </script>
 {% endblock %}

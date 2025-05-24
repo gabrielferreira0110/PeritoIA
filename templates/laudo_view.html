@@ -2,11 +2,11 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-md-3">
+    <div class="col-lg-3">
         <!-- Navegação lateral -->
-        <div class="card shadow mb-4">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">Seções do Laudo</h5>
+        <div class="card shadow-lg rounded-xl border-0 mb-4 hover-lift">
+            <div class="card-header" style="background: linear-gradient(135deg, var(--primary-600), var(--primary-700))">
+                <h5 class="mb-0 text-white fw-bold"><i class="fas fa-list-alt me-2"></i>Seções do Laudo</h5>
             </div>
             <div class="list-group list-group-flush">
                 {% set secoes_titulos = {
@@ -35,22 +35,22 @@
         </div>
         
         <!-- Arquivos do laudo -->
-        <div class="card shadow mb-4">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Arquivos</h5>
+        <div class="card shadow-lg rounded-xl border-0 mb-4 hover-lift">
+            <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, var(--primary-600), var(--primary-700))">
+                <h5 class="mb-0 text-white fw-bold"><i class="fas fa-file me-2"></i>Arquivos</h5>
                 <div class="dropdown">
-                    <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="addFileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-plus"></i>
+                    <button class="btn btn-sm btn-light rounded-pill" type="button" id="addFileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-plus me-1"></i> Anexar
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="addFileDropdown">
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg rounded-lg border-0" aria-labelledby="addFileDropdown">
                         <li>
-                            <a class="dropdown-item" href="{{ url_for('upload_processo', laudo_id=laudo.id) }}">
-                                <i class="fas fa-file-pdf me-2"></i> Anexar Processo
+                            <a class="dropdown-item py-2" href="{{ url_for('upload_processo', laudo_id=laudo.id) }}">
+                                <i class="fas fa-file-pdf me-2 text-danger"></i> Anexar Processo
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="{{ url_for('upload_audio', laudo_id=laudo.id) }}">
-                                <i class="fas fa-microphone me-2"></i> Anexar Áudio
+                            <a class="dropdown-item py-2" href="{{ url_for('upload_audio', laudo_id=laudo.id) }}">
+                                <i class="fas fa-microphone me-2 text-primary"></i> Anexar Áudio
                             </a>
                         </li>
                     </ul>
@@ -114,57 +114,84 @@
         </div>
     </div>
     
-    <div class="col-md-9">
+    <div class="col-lg-9">
         <!-- Cabeçalho do laudo -->
-        <div class="card shadow mb-4">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h4 class="mb-0">{{ laudo.title }}</h4>
-                <span class="badge bg-{{ 'success' if laudo.status == 'completo' else 'warning' }} fs-6">
+        <div class="card shadow-lg rounded-xl border-0 mb-4 hover-lift">
+            <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, var(--primary-600), var(--primary-700))">
+                <h4 class="mb-0 text-white fw-bold">{{ laudo.title }}</h4>
+                <span class="badge rounded-pill bg-{{ 'success' if laudo.status == 'completo' else 'warning' }} bg-opacity-10 text-{{ 'success' if laudo.status == 'completo' else 'warning' }} px-3 py-2" style="background-color: rgba(255,255,255,0.9) !important;">
+                    <i class="fas fa-{{ 'check-circle' if laudo.status == 'completo' else 'clock' }} me-1"></i>
                     {{ 'Completo' if laudo.status == 'completo' else 'Em andamento' }}
                 </span>
             </div>
-            <div class="card-body">
-                <div class="row">
+            <div class="card-body p-4">
+                <div class="row g-4">
                     <div class="col-md-6">
-                        <p class="mb-2">
-                            <strong><i class="fas fa-calendar-alt me-2"></i> Criado em:</strong> 
-                            {{ laudo.created_at.strftime('%d/%m/%Y %H:%M') }}
-                        </p>
-                        <p class="mb-2">
-                            <strong><i class="fas fa-clock me-2"></i> Última atualização:</strong> 
-                            {{ laudo.updated_at.strftime('%d/%m/%Y %H:%M') }}
-                        </p>
+                        <div class="mb-3 d-flex align-items-center">
+                            <div class="bg-light rounded-circle p-2 me-3">
+                                <i class="fas fa-calendar-alt text-primary"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted">Criado em:</small>
+                                <p class="mb-0 fw-medium">{{ laudo.created_at.strftime('%d/%m/%Y') if laudo.created_at else 'N/A' }}</p>
+                            </div>
+                        </div>
+                        <div class="mb-3 d-flex align-items-center">
+                            <div class="bg-light rounded-circle p-2 me-3">
+                                <i class="fas fa-clock text-primary"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted">Última atualização:</small>
+                                <p class="mb-0 fw-medium">{{ laudo.updated_at.strftime('%d/%m/%Y %H:%M') if laudo.updated_at else 'N/A' }}</p>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-md-6">
-                        <p class="mb-2">
-                            <strong><i class="fas fa-user me-2"></i> Perito:</strong> 
-                            {{ current_user.username }}
-                        </p>
+                        <div class="mb-3 d-flex align-items-center">
+                            <div class="bg-light rounded-circle p-2 me-3">
+                                <i class="fas fa-hashtag text-primary"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted">Número do caso:</small>
+                                <p class="mb-0 fw-medium">{{ laudo.case_number if laudo.case_number else 'N/A' }}</p>
+                            </div>
+                        </div>
                         {% if laudo.status == 'incompleto' %}
-                            <p class="mb-2">
-                                <strong><i class="fas fa-tasks me-2"></i> Etapa atual:</strong> 
-                                {{ laudo.current_stage }}
-                            </p>
+                            <div class="mb-3 d-flex align-items-center">
+                                <div class="bg-light rounded-circle p-2 me-3">
+                                    <i class="fas fa-tasks text-primary"></i>
+                                </div>
+                                <div>
+                                    <small class="text-muted">Etapa atual:</small>
+                                    <p class="mb-0 fw-medium">{{ laudo.current_stage }}</p>
+                                </div>
+                            </div>
                         {% endif %}
                     </div>
                 </div>
                 
+                {% if laudo.description %}
+                <div class="mt-4 p-3 bg-light rounded-lg">
+                    <h6 class="fw-bold"><i class="fas fa-info-circle me-2 text-primary"></i>Descrição</h6>
+                    <p class="mb-0">{{ laudo.description }}</p>
+                </div>
+                {% endif %}
+                
                 <!-- Barra de progresso -->
-                <div class="mt-3">
-                    <h6>Progresso da Elaboração</h6>
-                    <div class="progress" style="height: 20px;">
-                        {% set completed = secoes|selectattr('completed', 'eq', true)|list|length %}
-                        {% set total = secoes|length %}
-                        {% set percentage = (completed / total * 100)|int %}
+                <div class="mt-4">
+                    <h6 class="fw-bold"><i class="fas fa-tasks me-2 text-primary"></i>Progresso da Elaboração</h6>
+                    <div class="progress rounded-pill overflow-hidden" style="height: 8px;">
+                        {% set completed = secoes|selectattr('completed', 'eq', true)|list|length if secoes else 0 %}
+                        {% set total = secoes|length if secoes else 1 %}
+                        {% set percentage = (completed / total * 100)|int if total > 0 else 0 %}
                         <div class="progress-bar bg-success" role="progressbar" 
-                             style="width: {{ percentage }}%;" 
+                             style="width: {{ percentage }}%" 
                              aria-valuenow="{{ percentage }}" 
                              aria-valuemin="0" 
-                             aria-valuemax="100">
-                            {{ percentage }}%
-                        </div>
+                             aria-valuemax="100"></div>
                     </div>
-                    <div class="text-end mt-1">
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <small class="text-muted">{{ percentage }}% completo</small>
                         <small class="text-muted">{{ completed }} de {{ total }} seções concluídas</small>
                     </div>
                 </div>
@@ -186,12 +213,12 @@
             </div>
         </div>
         
-        <!-- Visão geral das seções -->
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">Visão Geral do Laudo</h5>
+        <!-- Conteúdo do laudo -->
+        <div class="card shadow-lg rounded-xl border-0 mb-4 hover-lift">
+            <div class="card-header" style="background: linear-gradient(135deg, var(--primary-600), var(--primary-700))">
+                <h5 class="mb-0 text-white fw-bold"><i class="fas fa-file-alt me-2"></i>Conteúdo do Laudo</h5>
             </div>
-            <div class="card-body">
+            <div class="card-body p-4">
                 <div class="accordion" id="secoesSummaryAccordion">
                     {% set secoes_titulos = {
                         'preambulo': 'Preâmbulo',
@@ -204,22 +231,23 @@
                         'conclusao': 'Conclusão'
                     } %}
                     
-                    {% for secao in secoes %}
-                        <div class="accordion-item">
+                    {% for secao in secoes|default([]) %}
+                        <div class="accordion-item border-0 mb-3 rounded-lg overflow-hidden shadow-sm">
                             <h2 class="accordion-header" id="heading{{ secao.secao_tipo }}">
-                                <button class="accordion-button {{ 'collapsed' if not secao.completed }}" 
+                                <button class="accordion-button fw-medium {{ 'collapsed' if not secao.completed }}" 
                                         type="button" 
                                         data-bs-toggle="collapse" 
                                         data-bs-target="#collapse{{ secao.secao_tipo }}" 
                                         aria-expanded="{{ 'true' if secao.completed else 'false' }}" 
                                         aria-controls="collapse{{ secao.secao_tipo }}">
                                     <div class="d-flex justify-content-between align-items-center w-100 me-3">
-                                        <span>{{ secoes_titulos.get(secao.secao_tipo, secao.secao_tipo) }}</span>
-                                        {% if secao.completed %}
-                                            <span class="badge bg-success">Completo</span>
-                                        {% else %}
-                                            <span class="badge bg-warning">Pendente</span>
-                                        {% endif %}
+                                        <div>
+                                            <i class="fas fa-{{ 'check-circle text-success me-2' if secao.completed else 'circle text-muted me-2' }}"></i>
+                                            {{ secoes_titulos.get(secao.secao_tipo, secao.secao_tipo) }}
+                                        </div>
+                                        <span class="badge rounded-pill bg-{{ 'success' if secao.completed else 'warning' }} bg-opacity-10 text-{{ 'success' if secao.completed else 'warning' }} px-3 py-2">
+                                            {{ 'Completo' if secao.completed else 'Pendente' }}
+                                        </span>
                                     </div>
                                 </button>
                             </h2>
@@ -227,19 +255,27 @@
                                  class="accordion-collapse collapse {{ 'show' if secao.completed }}" 
                                  aria-labelledby="heading{{ secao.secao_tipo }}" 
                                  data-bs-parent="#secoesSummaryAccordion">
-                                <div class="accordion-body">
+                                <div class="accordion-body bg-light">
                                     {% if secao.completed and secao.conteudo %}
-                                        <div class="content-preview">
-                                            {{ secao.conteudo|truncate(200) }}
-                                            {% if secao.conteudo|length > 200 %}
-                                                <a href="{{ url_for('edit_secao', laudo_id=laudo.id, secao_tipo=secao.secao_tipo) }}">Ler mais</a>
+                                        <div class="content-preview bg-white p-3 rounded-lg shadow-sm">
+                                            {{ secao.conteudo|truncate(300) }}
+                                            {% if secao.conteudo|length > 300 %}
+                                                <div class="mt-3">
+                                                    <a href="{{ url_for('edit_secao', laudo_id=laudo.id, secao_tipo=secao.secao_tipo) }}" class="btn btn-sm btn-primary rounded-pill">
+                                                        <i class="fas fa-book-open me-1"></i> Ler mais
+                                                    </a>
+                                                </div>
                                             {% endif %}
                                         </div>
                                     {% else %}
-                                        <div class="text-center py-3">
-                                            <p class="text-muted mb-3">Esta seção ainda não foi preenchida.</p>
-                                            <a href="{{ url_for('edit_secao', laudo_id=laudo.id, secao_tipo=secao.secao_tipo) }}" class="btn btn-primary">
-                                                <i class="fas fa-edit me-1"></i> Editar Seção
+                                        <div class="text-center py-4">
+                                            <div class="empty-state-icon bg-white rounded-circle mx-auto mb-3">
+                                                <i class="fas fa-file-alt text-primary"></i>
+                                            </div>
+                                            <h6 class="fw-bold">Esta seção ainda não foi preenchida</h6>
+                                            <p class="text-muted mb-4">Adicione conteúdo a esta seção para completar seu laudo.</p>
+                                            <a href="{{ url_for('edit_secao', laudo_id=laudo.id, secao_tipo=secao.secao_tipo) }}" class="btn btn-primary rounded-pill px-4">
+                                                <i class="fas fa-edit me-2"></i> Editar Seção
                                             </a>
                                         </div>
                                     {% endif %}
@@ -258,7 +294,42 @@
 <script>
     // Scripts específicos para a página de visualização de laudo
     document.addEventListener('DOMContentLoaded', function() {
-        // Aqui ficaria alguma lógica específica para esta página, se necessário
+        // Adiciona efeito de hover nos itens do accordion
+        const accordionItems = document.querySelectorAll('.accordion-item');
+        accordionItems.forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.classList.add('shadow');
+                this.style.transform = 'translateY(-3px)';
+                this.style.transition = 'all 0.3s ease';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.classList.remove('shadow');
+                this.style.transform = 'translateY(0)';
+            });
+        });
+        
+        // Inicializa tooltips para melhorar a usabilidade
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Adiciona funcionalidade para copiar o número do caso para a área de transferência
+        const copyButtons = document.querySelectorAll('.copy-to-clipboard');
+        copyButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const textToCopy = this.getAttribute('data-clipboard-text');
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    // Altera o ícone temporariamente para indicar sucesso
+                    const originalHTML = this.innerHTML;
+                    this.innerHTML = '<i class="fas fa-check"></i>';
+                    setTimeout(() => {
+                        this.innerHTML = originalHTML;
+                    }, 2000);
+                });
+            });
+        });
     });
 </script>
 {% endblock %}
